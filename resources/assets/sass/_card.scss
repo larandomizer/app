@@ -1,0 +1,139 @@
+@import "../../../node_modules/bootstrap/scss/card";
+
+.card {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+// Card Stat
+.card-stat {
+  padding: 2rem;
+  position: relative;
+
+  // Icon
+  .card-icon {
+    border-radius: 50%;
+    font-size: 24px;
+    float: left;
+    height: 64px;
+    line-height: 64px;
+    padding: 0;
+    text-align: center;
+    width: 64px;
+  }
+
+  // Details
+  .card-details {
+    float: left;
+    margin-left: 1.5rem;
+  }
+  .card-title {
+    color: #4a4a4a;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 1.25rem;
+    margin-top: .25rem;
+  }
+  .card-subtitle {
+    color: #b3b3b3;
+  }
+
+}
+
+.card-stat-uptime,
+.card-stat-prizes,
+.card-stat-connections {
+  .card-icon, .dropdown-icon {
+    color: #ffffff;
+  }
+}
+
+.card-stat-connections {
+  .card-icon, .dropdown-icon {
+    background-color: $brand-info;
+  }
+}
+
+.card-stat-uptime {
+  .card-icon, .dropdown-icon {
+    background-color: $brand-success;
+  }
+}
+
+.card-stat-prizes {
+  .card-icon, .dropdown-icon {
+    background-color: $brand-warning;
+  }
+}
+
+.card-dropdown {
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  // Dropdown Button
+  .btn-dropdown {
+    box-shadow: none;
+    color: #d8d8d8;
+    cursor: pointer;
+    font-size: 24px;
+
+    &:hover {
+      color: $brand-primary;
+    }
+  }
+
+  // Dropdown Menu
+  .dropdown-menu {
+    left: auto;
+    right: -20%;
+    // Arrow
+    &:before, &:after {
+      left: auto;
+      margin-left: initial !important;
+      right: 40px;
+    }
+    &:after {
+      margin-right: -15px;
+    }
+    &:before {
+      margin-right: -16px;
+    }
+  }
+
+  // Dropdown Icon
+  .dropdown-icon {
+    border-radius: 50%;
+    font-size: 18px;
+    height: 24px;
+    line-height: 24px;
+    margin: 0 .5rem 0 0;
+    text-align: center;
+    width: 24px;
+  }
+}
+
+// Card Header
+.card .card-header {
+  color: #b3b3b3;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+// Card Table
+.card-table .table {
+  th {
+    color: #666666;
+  }
+  td {
+    color: #999999;
+  }
+  th, td {
+    font-size: 13px;
+    padding-left: 1.25rem;
+  }
+  .mdi {
+    font-size: 20px;
+    position: relative;
+    top: -4px;
+  }
+}

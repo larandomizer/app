@@ -1,0 +1,29 @@
+.footer {
+  color: #b8b9b9;
+  font-size: 12px;
+  margin: 2rem 0;
+
+  a:hover {
+    color: $brand-primary;
+    text-decoration: none;
+  }
+}
+
+.footer-link {
+  color: #999999;
+}
+
+.footer-links {
+  font-size: 14px;
+  text-align: right;
+
+  > .footer-link {
+    margin-left: 1.5rem;
+  }
+  > .footer-link.mdi:before {
+    font-size: 20px;
+    margin-right: .5rem;
+    margin-top: -.25rem;
+    vertical-align: top;
+  }
+}

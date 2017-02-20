@@ -1,0 +1,13 @@
+@import "../../../node_modules/bootstrap/scss/badge";
+
+.badge {
+  text-transform: uppercase;
+}
+
+.badge-block {
+  display: block;
+}
+
+.badge-inverse {
+  @include badge-variant($badge-inverse-bg);
+}

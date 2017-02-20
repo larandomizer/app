@@ -1,0 +1,69 @@
+
+@import "../../../node_modules/bootstrap/scss/variables";
+
+// Body
+$body-bg: #f3f5f7;
+
+// Borders
+$laravel-border-color: darken($body-bg, 10%);
+$list-group-border: $laravel-border-color;
+$navbar-default-border: $laravel-border-color;
+$panel-default-border: $laravel-border-color;
+$panel-inner-border: $laravel-border-color;
+
+// Base Colors
+$base-grey: #9b9b9b;
+$base-blue: #1875f0;
+$base-green: #50d166;
+$base-orange: #f5a623;
+$base-pink: #ff3254;
+$base-purple: #5553ce;
+
+// Brand Colors
+$brand-primary:     $base-pink;
+$brand-success:     $base-green;
+$brand-info:        $base-blue;
+$brand-warning:     $base-orange;
+$brand-danger:      $red;
+$brand-inverse:     $base-purple;
+$link-color:        $base-pink;
+
+// Badge Colors
+$badge-default-bg:  $base-grey;
+$badge-primary-bg:  $brand-primary;
+$badge-success-bg:  $brand-success;
+$badge-info-bg:     $brand-info;
+$badge-warning-bg:  $brand-warning;
+$badge-danger-bg:   $brand-danger;
+$badge-inverse-bg:  $brand-inverse;
+$badge-padding-y:   .25rem;
+$badge-padding-x:   1rem;
+$badge-font-size:   9px;
+
+// Typography
+$icon-font-path: "~bootstrap-sass/assets/fonts/bootstrap/";
+$font-family-sans-serif: "Roboto", sans-serif;
+$font-size-base: 14px;
+$line-height-base: 1.6;
+$text-color: #636b6f;
+
+// Navbar
+$navbar-default-bg: #fff;
+$navbar-padding-y: 1.5rem;
+$navbar-padding-x: 0;
+$nav-link-padding:  .5em 0;
+
+// Buttons
+$btn-default-color: $text-color;
+
+// Inputs
+$input-border: lighten($text-color, 40%);
+$input-border-focus: lighten($brand-primary, 25%);
+$input-color-placeholder: lighten($text-color, 30%);
+
+// Panels
+$panel-default-heading-bg: #fff;
+
+// Cards
+$card-border-color: transparent;
+$card-cap-bg: tranparent;
