@@ -26935,6 +26935,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
 
 /* harmony default export */ __webpack_exports__["default"] = {
     computed: {
@@ -49863,12 +49864,14 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     }
   }, [_c('i', {
     staticClass: "d-inline-flex mdi mdi-account-circle"
-  }), _vm._v(" "), _c('span', {
+  }), _vm._v(" "), (_vm.status) ? _c('span', {
     staticClass: "d-inline-flex align-items-center",
     domProps: {
       "textContent": _vm._s(_vm.user.name)
     }
-  })])
+  }) : _vm._e(), _vm._v(" "), (!_vm.status) ? _c('span', {
+    staticClass: "d-inline-flex align-items-center"
+  }, [_vm._v("Not connected")]) : _vm._e()])
 },staticRenderFns: []}
 module.exports.render._withStripped = true
 if (false) {
