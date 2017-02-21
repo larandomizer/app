@@ -1,0 +1,43 @@
+// Notifications
+.nav-notifications {
+  margin: 0;
+
+  // Notification Count
+  &-count {
+    background-color: $brand-info;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 12px;
+    height: 19px;
+    line-height: 14px;
+    padding: 0 .25rem;
+    margin-left: -.5rem;
+  }
+
+  // Notifications Dropdown Menu
+  .dropdown-menu {
+    @include media-breakpoint-up(md) {
+      left: -115px;
+      position: absolute;
+      width: 260px;
+      top: 110%;
+    }
+  }
+
+  // Notifications Icon
+  .nav-notification-icon {
+    color: $brand-inverse;
+    padding: 0 1rem 0 0;
+  }
+
+  // Notifications Timestamp
+  .nav-notification-time {
+    color: $base-grey;
+    padding: 0 0 0 1rem;
+  }
+}
+
+// Nav notifications in the header
+.header .navbar-nav .nav-notifications .nav-link {
+  margin: 0;
+}

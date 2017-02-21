@@ -1,0 +1,33 @@
+// Connections
+.nav-user,
+.nav-connection {
+  .mdi {
+    line-height: 1;
+    margin-left: .5rem;
+  }
+}
+
+
+// User & Connection - Connected Shared Styles
+.nav-user.is-connected,
+.nav-connection.is-connected {
+  .mdi {
+    color: $brand-primary;
+  }
+}
+
+// User Disconnected
+.nav-user.is-disconnected .mdi {
+  color: $gray-lighter;
+}
+
+// Connection Disconnected
+.nav-connection.is-disconnected .mdi {
+  color: $brand-info;
+}
+
+// User Specific Styles
+.nav-user .mdi {
+  font-size: 36px;
+  margin-right: .5rem;
+}

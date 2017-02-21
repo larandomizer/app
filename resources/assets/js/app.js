@@ -13,7 +13,11 @@ require('./bootstrap');
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
+window.Event = new Vue();
+
 Vue.component('stat', require('./components/Stat.vue'));
+Vue.component('user', require('./components/User.vue'));
+Vue.component('connection', require('./components/Connection.vue'));
 Vue.component('notifications', require('./components/Notifications.vue'));
 
 const app = new Vue({
@@ -26,6 +30,8 @@ const app = new Vue({
     },
 
     data: {
+        currentUser: {name: "Eoghan O'Brien"},
+        currentConnection: false,
         numConnections: 0,
         numPrizes: 3,
         numPrizesWon: 0,
@@ -37,17 +43,10 @@ const app = new Vue({
         ]
     },
 
-    mounted() {
-        var conn = new WebSocket('ws://localhost:8080');
-        conn.onopen = function(e) {
-            console.log(e);
-            console.log("Connection established!");
-        };
-
-        conn.onmessage = function(e) {
-            console.log(e);
-            console.log(e.data);
-        };
+    created() {
+        Event.$on("connection.toggle", () => {
+            this.currentConnection = !this.currentConnection;
+        });
     },
 
     methods: {

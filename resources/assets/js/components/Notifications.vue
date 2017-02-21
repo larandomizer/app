@@ -1,5 +1,5 @@
 <template>
-    <div class="dropdown nav-notifications">
+    <div class="dropdown nav-notifications" v-if="isConnected">
         <a href="#notifications" class="nav-link nav-item btn-dropdown d-flex p-1" id="notificationButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="mdi d-inline-flex align-items-center mdi-bell"></i>
             <span class="d-inline-flex align-items-center nav-notifications-count">{{ messageCount }}</span>
@@ -22,11 +22,14 @@
     import * as moment from 'moment';
 
     export default {
-        props: ['messages'],
+        props: ['messages', 'status'],
         computed: {
             messageCount() {
                 return this.messages.length;
-            }
+            },
+            isConnected() {
+                return this.status;
+            },
         },
         methods: {
             ago(message) {
