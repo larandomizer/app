@@ -19,6 +19,16 @@ class Event {
     }
 
     /**
+     * Fire an event with a payload but only once.
+     *
+     * @param event
+     * @param data
+     */
+    once(event, data = null) {
+        this.vue.$once(event, data);
+    }
+
+    /**
      * Listen for an event and call the callback.
      *
      * @param event
