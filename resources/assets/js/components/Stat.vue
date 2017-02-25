@@ -7,7 +7,7 @@
                 <h6 class="card-subtitle" v-text="subtitle"></h6>
             </div>
         </div>
-        <stat_dropdown :items="menuItems" v-if="menuItems"></stat_dropdown>
+        <stat-dropdown :items="menuItems" v-if="menuItems"></stat-dropdown>
     </div>
 </template>
 

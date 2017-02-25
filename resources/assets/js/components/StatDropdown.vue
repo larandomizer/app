@@ -4,7 +4,7 @@
             <span class="mdi mdi-dots-horizontal"></span>
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownButton">
-            <stat_dropdown_item v-for="item in items" :icon="item.icon" :event="item.event" :title="item.title"></stat_dropdown_item>
+            <stat-dropdown-item v-for="item in items" :icon="item.icon" :event="item.event" :title="item.title"></stat-dropdown-item>
         </div>
     </div>
 </template>
