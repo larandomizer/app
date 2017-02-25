@@ -16,11 +16,21 @@
 
   // Notifications Dropdown Menu
   .dropdown-menu {
+    padding-top: 0;
+
     @include media-breakpoint-up(md) {
       left: -115px;
       position: absolute;
       width: 260px;
       top: 110%;
+    }
+
+    &:after {
+      border-bottom-color: #f7f7f9;
+    }
+
+    > .dropdown-item:first-child {
+      background-color: #f7f7f9;
     }
   }
 
@@ -37,7 +47,13 @@
   }
 }
 
+.nav-notifications-list {
+  height: 12rem;
+  overflow: auto;
+}
+
 // Nav notifications in the header
 .header .navbar-nav .nav-notifications .nav-link {
-  margin: 0;
+  margin: 0 !important;;
+  padding: 0 !important;
 }

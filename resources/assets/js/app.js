@@ -37,9 +37,10 @@ const app = new Vue({
         numPrizesWon: 0,
         serverUptime: 0,
         messages: [
-            {from: 'Joseph James', created_at: '2017-02-19 19:13:00'},
-            {from: 'Lettie Jordan', created_at: '2017-02-19 19:09:00'},
-            {from: 'Daniel Labarge', created_at: '2017-02-19 19:03:00'},
+            {from: 'Joseph James', created_at: '2017-02-25 10:19:00', read: false},
+            {from: 'Lettie Jordan', created_at: '2017-02-25 10:14:00', read: false},
+            {from: 'Daniel Labarge', created_at: '2017-02-25 10:08:00', read: false},
+            {from: 'Ben Batschelet', created_at: '2017-02-25 10:03:00', read: false},
         ]
     },
 
