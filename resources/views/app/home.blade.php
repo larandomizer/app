@@ -18,9 +18,7 @@
     <div class="row mt-4">
         <div class="col-md-12">
             <div class="card card-table">
-                <div class="card-header">
-                    Prize Pool
-                </div>
+                <div class="card-header">Prize Pool</div>
                 <grid :columns="columns" :records="connections" :current="currentUser"></grid>
             </div>
         </div>
