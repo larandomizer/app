@@ -19,5 +19,5 @@
   },
   "devDependencies": {
     "laravel-mix": "^0.8.1"
-  },
+  }
 }
