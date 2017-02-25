@@ -15,12 +15,14 @@ require('./bootstrap');
 
 window.Event = require('./lib/Event');
 
-Vue.component('stat_dropdown_item', require('./components/StatDropdownItem.vue'));
-Vue.component('stat_dropdown', require('./components/StatDropdown.vue'));
+Vue.component('stat-dropdown-item', require('./components/StatDropdownItem.vue'));
+Vue.component('stat-dropdown', require('./components/StatDropdown.vue'));
 Vue.component('stat', require('./components/Stat.vue'));
 Vue.component('user', require('./components/User.vue'));
 Vue.component('connection', require('./components/Connection.vue'));
 Vue.component('notifications', require('./components/Notifications.vue'));
+Vue.component('grid-col', require('./components/GridColumn.vue'));
+Vue.component('grid', require('./components/Grid.vue'));
 
 const app = new Vue({
     el: '#app',
@@ -38,6 +40,9 @@ const app = new Vue({
         Event.listen("connection.all.disconnect", () => {
             this.disconnect();
         });
+        Event.listen('connection.ping', connection => {
+            console.log('Ping: ', connection);
+        });
     },
 
     computed: {
@@ -47,9 +52,15 @@ const app = new Vue({
     },
 
     data: {
-        currentUser: {name: "Eoghan O'Brien"},
+        currentUser: {
+            name: "Eoghan O'Brien",
+            email: 'eoghan@artisanscollaborative.com',
+            player_id: '123456780',
+            ip_address: '210.13.71.1',
+            timestamp: 0,
+            status: 'waiting'
+        },
         currentConnection: false,
-        numConnections: 0,
         numPrizes: 3,
         numPrizesWon: 0,
         serverUptime: 0,
@@ -73,7 +84,57 @@ const app = new Vue({
             server: [
                 {icon: 'autorenew', event: 'server.restart', title: 'Restart Server'}
             ],
-        }
+        },
+        columns: [
+            { name: 'Name', key: 'name', width: '' },
+            { name: 'Email', key: 'email', width: '' },
+            { name: 'Player ID', key: 'player_id', width: '' },
+            { name: 'IP Address', key: 'ip_address', width: '' },
+            { name: 'Time', key: 'timestamp', width: '' },
+            { name: 'Status', key: 'status', width: '80' }
+        ],
+        connections: [
+            {
+                name: 'Gary Bryan',
+                email: 'gary@bryan.com',
+                player_id: '123456781',
+                ip_address: '210.13.71.1',
+                timestamp: '0',
+                status: 'winner'
+            },
+            {
+                name: 'Anonymous',
+                email: 'Not Available',
+                player_id: '123456782',
+                ip_address: '210.13.71.1',
+                timestamp: 0,
+                status: 'spectator'
+            },
+            {
+                name: "Eoghan O'Brien",
+                email: 'eoghan@artisanscollaborative.com',
+                player_id: '123456780',
+                ip_address: '210.13.71.1',
+                timestamp: 0,
+                status: 'waiting'
+            },
+            {
+                name: "Ada Thompson",
+                email: 'ada@thompson.com',
+                player_id: '123456783',
+                ip_address: '210.13.71.1',
+                timestamp: 0,
+                status: 'loser'
+            },
+            {
+                name: "Lela Harris",
+                email: 'lela@harris.com',
+                player_id: '123456784',
+                ip_address: '210.13.71.1',
+                timestamp: 0,
+                status: 'ready'
+            }
+        ]
     },
 
     methods: {
