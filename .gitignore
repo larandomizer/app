@@ -4,8 +4,12 @@
 /.idea
 /.vagrant
 /node_modules
+/public/js
+/public/css
 /public/hot
+/public/fonts
 /public/storage
+/public/mix-manifest.json
 /storage/*.key
 /Vagrantfile
 /vendor

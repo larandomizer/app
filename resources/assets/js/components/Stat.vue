@@ -7,14 +7,7 @@
                 <h6 class="card-subtitle" v-text="subtitle"></h6>
             </div>
         </div>
-        <div class="dropdown card-dropdown">
-            <button class="btn btn-link btn-dropdown" type="button" id="dropdownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="mdi mdi-dots-horizontal"></span>
-            </button>
-            <div class="dropdown-menu" aria-labelledby="dropdownButton">
-                <slot></slot>
-            </div>
-        </div>
+        <stat_dropdown :items="menuItems" v-if="menuItems"></stat_dropdown>
     </div>
 </template>
 
@@ -28,9 +21,6 @@
                 return 'mdi-' + this.icon
             }
         },
-        props: ['name', 'icon', 'title', 'subtitle'],
-        mounted() {
-
-        }
+        props: ['name', 'icon', 'title', 'subtitle', 'menuItems']
     }
 </script>

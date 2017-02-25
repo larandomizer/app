@@ -22,7 +22,7 @@
         methods: {
             toggle(e) {
                 e.preventDefault();
-                Event.$emit('connection.toggle');
+                Event.fire('connection.toggle');
             }
         }
     }
