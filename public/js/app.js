@@ -25926,8 +25926,10 @@ __webpack_require__(145);
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-window.Event = new Vue();
+window.Event = __webpack_require__(168);
 
+Vue.component('stat_dropdown_item', __webpack_require__(172));
+Vue.component('stat_dropdown', __webpack_require__(171));
 Vue.component('stat', __webpack_require__(152));
 Vue.component('user', __webpack_require__(153));
 Vue.component('connection', __webpack_require__(150));
@@ -25935,6 +25937,24 @@ Vue.component('notifications', __webpack_require__(151));
 
 var app = new Vue({
     el: '#app',
+
+    created: function created() {
+        var _this = this;
+
+        Event.listen("connection.toggle", function () {
+            _this.currentConnection = !_this.currentConnection;
+        });
+        Event.listen("connection.players.disconnect", function () {
+            _this.disconnectPlayers();
+        });
+        Event.listen("connection.spectators.disconnect", function () {
+            _this.disconnectSpectators();
+        });
+        Event.listen("connection.all.disconnect", function () {
+            _this.disconnect();
+        });
+    },
+
 
     computed: {
         prizesStatus: function prizesStatus() {
@@ -25949,17 +25969,13 @@ var app = new Vue({
         numPrizes: 3,
         numPrizesWon: 0,
         serverUptime: 0,
-        messages: [{ from: 'Joseph James', created_at: '2017-02-25 10:19:00', read: false }, { from: 'Lettie Jordan', created_at: '2017-02-25 10:14:00', read: false }, { from: 'Daniel Labarge', created_at: '2017-02-25 10:08:00', read: false }, { from: 'Ben Batschelet', created_at: '2017-02-25 10:03:00', read: false }]
+        messages: [{ from: 'Joseph James', created_at: '2017-02-25 10:19:00', read: false }, { from: 'Lettie Jordan', created_at: '2017-02-25 10:14:00', read: false }, { from: 'Daniel Labarge', created_at: '2017-02-25 10:08:00', read: false }, { from: 'Ben Batschelet', created_at: '2017-02-25 10:03:00', read: false }],
+        menus: {
+            connections: [{ icon: 'power', event: 'connection.spectators.disconnect', title: 'Disconnect Spectators' }, { icon: 'power', event: 'connection.players.disconnect', title: 'Disconnect Players' }, { icon: 'power', event: 'connection.all.disconnect', title: 'Disconnect All' }],
+            prizes: [{ icon: 'plus', event: 'prizes.new', title: 'Add New Prize' }, { icon: 'trophy-variant-outline', event: 'prizes.winner.new', title: 'New Winner' }, { icon: 'refresh', event: 'prizes.reset', title: 'Reset Prizes' }],
+            server: [{ icon: 'autorenew', event: 'server.restart', title: 'Restart Server' }]
+        }
     },
-
-    created: function created() {
-        var _this = this;
-
-        Event.$on("connection.toggle", function () {
-            _this.currentConnection = !_this.currentConnection;
-        });
-    },
-
 
     methods: {
         // Prize Control Methods
@@ -25973,14 +25989,13 @@ var app = new Vue({
         serverStop: function serverStop(e) {},
 
         // Connection Control Methods
-        disconnectSpectators: function disconnectSpectators(e) {
-            this.disconnect(e, 'spectators');
+        disconnectSpectators: function disconnectSpectators() {
+            this.disconnect('spectators');
         },
-        disconnectPlayers: function disconnectPlayers(e) {
-            this.disconnect(e, 'players');
+        disconnectPlayers: function disconnectPlayers() {
+            this.disconnect('players');
         },
-        disconnect: function disconnect(e, group) {
-            e.preventDefault();
+        disconnect: function disconnect(group) {
             group = group || 'all';
             console.log('Disconnect ' + group);
         }
@@ -26864,7 +26879,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     methods: {
         toggle: function toggle(e) {
             e.preventDefault();
-            Event.$emit('connection.toggle');
+            Event.fire('connection.toggle');
         }
     }
 };
@@ -26949,13 +26964,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
 
 /* harmony default export */ __webpack_exports__["default"] = {
     computed: {
@@ -26966,8 +26974,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             return 'mdi-' + this.icon;
         }
     },
-    props: ['name', 'icon', 'title', 'subtitle'],
-    mounted: function mounted() {}
+    props: ['name', 'icon', 'title', 'subtitle', 'menuItems']
 };
 
 /***/ }),
@@ -49903,28 +49910,12 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
     domProps: {
       "textContent": _vm._s(_vm.subtitle)
     }
-  })])]), _vm._v(" "), _c('div', {
-    staticClass: "dropdown card-dropdown"
-  }, [_vm._m(0), _vm._v(" "), _c('div', {
-    staticClass: "dropdown-menu",
+  })])]), _vm._v(" "), (_vm.menuItems) ? _c('stat_dropdown', {
     attrs: {
-      "aria-labelledby": "dropdownButton"
+      "items": _vm.menuItems
     }
-  }, [_vm._t("default")], 2)])])
-},staticRenderFns: [function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
-  return _c('button', {
-    staticClass: "btn btn-link btn-dropdown",
-    attrs: {
-      "type": "button",
-      "id": "dropdownButton",
-      "data-toggle": "dropdown",
-      "aria-haspopup": "true",
-      "aria-expanded": "false"
-    }
-  }, [_c('span', {
-    staticClass: "mdi mdi-dots-horizontal"
-  })])
-}]}
+  }) : _vm._e()], 1)
+},staticRenderFns: []}
 module.exports.render._withStripped = true
 if (false) {
   module.hot.accept()
@@ -58640,6 +58631,276 @@ module.exports = Vue$3;
 __webpack_require__(121);
 module.exports = __webpack_require__(122);
 
+
+/***/ }),
+/* 160 */,
+/* 161 */,
+/* 162 */,
+/* 163 */,
+/* 164 */,
+/* 165 */,
+/* 166 */,
+/* 167 */,
+/* 168 */
+/***/ (function(module, exports) {
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Event = function () {
+    /**
+     * Constructor
+     *
+     * @param vue
+     */
+    function Event() {
+        var vue = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+
+        _classCallCheck(this, Event);
+
+        this.vue = vue || new Vue();
+    }
+
+    /**
+     * Fire an event with a payload.
+     *
+     * @param event
+     * @param data
+     */
+
+
+    _createClass(Event, [{
+        key: "fire",
+        value: function fire(event) {
+            var data = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
+            this.vue.$emit(event, data);
+        }
+
+        /**
+         * Listen for an event and call the callback.
+         *
+         * @param event
+         * @param callback
+         */
+
+    }, {
+        key: "listen",
+        value: function listen(event, callback) {
+            this.vue.$on(event, callback);
+        }
+    }]);
+
+    return Event;
+}();
+
+var event = new Event();
+
+module.exports = event;
+
+/***/ }),
+/* 169 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = {
+    props: ['items']
+};
+
+/***/ }),
+/* 170 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = {
+    computed: {
+        nameClass: function nameClass() {
+            return 'dropdown-item-' + this.name();
+        },
+        iconClass: function iconClass() {
+            return 'mdi-' + this.icon;
+        },
+        link: function link() {
+            return '#' + this.name();
+        }
+    },
+    props: ['event', 'icon', 'title'],
+    methods: {
+        click: function click(e) {
+            e.preventDefault();
+            Event.fire(this.event);
+        },
+        name: function name() {
+            return this.event.replace('.', '-').toLowerCase();
+        }
+    }
+};
+
+/***/ }),
+/* 171 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var Component = __webpack_require__(2)(
+  /* script */
+  __webpack_require__(169),
+  /* template */
+  __webpack_require__(173),
+  /* scopeId */
+  null,
+  /* cssModules */
+  null
+)
+Component.options.__file = "/Users/eoghanobrien/Sites/projects/Artisans/larandomizer/resources/assets/js/components/StatDropdown.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
+if (Component.options.functional) {console.error("[vue-loader] StatDropdown.vue: functional components are not supported with templates, they should use render functions.")}
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-4a9a5122", Component.options)
+  } else {
+    hotAPI.reload("data-v-4a9a5122", Component.options)
+  }
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 172 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var Component = __webpack_require__(2)(
+  /* script */
+  __webpack_require__(170),
+  /* template */
+  __webpack_require__(174),
+  /* scopeId */
+  null,
+  /* cssModules */
+  null
+)
+Component.options.__file = "/Users/eoghanobrien/Sites/projects/Artisans/larandomizer/resources/assets/js/components/StatDropdownItem.vue"
+if (Component.esModule && Object.keys(Component.esModule).some(function (key) {return key !== "default" && key !== "__esModule"})) {console.error("named exports are not supported in *.vue files.")}
+if (Component.options.functional) {console.error("[vue-loader] StatDropdownItem.vue: functional components are not supported with templates, they should use render functions.")}
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-7db8b1a2", Component.options)
+  } else {
+    hotAPI.reload("data-v-7db8b1a2", Component.options)
+  }
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 173 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('div', {
+    staticClass: "dropdown card-dropdown"
+  }, [_vm._m(0), _vm._v(" "), _c('div', {
+    staticClass: "dropdown-menu",
+    attrs: {
+      "aria-labelledby": "dropdownButton"
+    }
+  }, _vm._l((_vm.items), function(item) {
+    return _c('stat_dropdown_item', {
+      attrs: {
+        "icon": item.icon,
+        "event": item.event,
+        "title": item.title
+      }
+    })
+  }))])
+},staticRenderFns: [function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('button', {
+    staticClass: "btn btn-link btn-dropdown",
+    attrs: {
+      "type": "button",
+      "id": "dropdownButton",
+      "data-toggle": "dropdown",
+      "aria-haspopup": "true",
+      "aria-expanded": "false"
+    }
+  }, [_c('span', {
+    staticClass: "mdi mdi-dots-horizontal"
+  })])
+}]}
+module.exports.render._withStripped = true
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+     require("vue-hot-reload-api").rerender("data-v-4a9a5122", module.exports)
+  }
+}
+
+/***/ }),
+/* 174 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;
+  return _c('a', {
+    staticClass: "dropdown-item d-flex",
+    class: _vm.nameClass,
+    attrs: {
+      "href": _vm.link
+    },
+    on: {
+      "click": _vm.click
+    }
+  }, [_c('i', {
+    staticClass: "mdi dropdown-icon",
+    class: _vm.iconClass
+  }), _vm._v(" "), _c('span', {
+    staticClass: "d-inline-flex align-items-center",
+    domProps: {
+      "textContent": _vm._s(_vm.title)
+    }
+  })])
+},staticRenderFns: []}
+module.exports.render._withStripped = true
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+     require("vue-hot-reload-api").rerender("data-v-7db8b1a2", module.exports)
+  }
+}
 
 /***/ })
 /******/ ]);

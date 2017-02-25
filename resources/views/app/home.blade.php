@@ -6,13 +6,13 @@
 <div class="container">
     <div class="row">
         <div class="col-md-4">
-            @include('app.cards.connections')
+            <stat name="connections" icon="account-multiple" :title="numConnections" subtitle="Connections" :menu-items="menus.connections"></stat>
         </div>
         <div class="col-md-4">
-            @include('app.cards.server')
+            <stat name="uptime" icon="clock" :title="serverUptime" subtitle="Server Uptime" :menu-items="menus.server"></stat>
         </div>
         <div class="col-md-4">
-            @include('app.cards.prizes')
+            <stat name="prizes" icon="trophy-variant-outline" :title="prizesStatus" subtitle="Prizes Available" :menu-items="menus.prizes"></stat>
         </div>
     </div>
     <div class="row mt-4">

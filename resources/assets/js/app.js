@@ -13,8 +13,10 @@ require('./bootstrap');
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-window.Event = new Vue();
+window.Event = require('./lib/Event');
 
+Vue.component('stat_dropdown_item', require('./components/StatDropdownItem.vue'));
+Vue.component('stat_dropdown', require('./components/StatDropdown.vue'));
 Vue.component('stat', require('./components/Stat.vue'));
 Vue.component('user', require('./components/User.vue'));
 Vue.component('connection', require('./components/Connection.vue'));
@@ -22,6 +24,21 @@ Vue.component('notifications', require('./components/Notifications.vue'));
 
 const app = new Vue({
     el: '#app',
+
+    created() {
+        Event.listen("connection.toggle", () => {
+            this.currentConnection = !this.currentConnection;
+        });
+        Event.listen("connection.players.disconnect", () => {
+            this.disconnectPlayers();
+        });
+        Event.listen("connection.spectators.disconnect", () => {
+            this.disconnectSpectators();
+        });
+        Event.listen("connection.all.disconnect", () => {
+            this.disconnect();
+        });
+    },
 
     computed: {
         prizesStatus() {
@@ -41,13 +58,22 @@ const app = new Vue({
             {from: 'Lettie Jordan', created_at: '2017-02-25 10:14:00', read: false},
             {from: 'Daniel Labarge', created_at: '2017-02-25 10:08:00', read: false},
             {from: 'Ben Batschelet', created_at: '2017-02-25 10:03:00', read: false},
-        ]
-    },
-
-    created() {
-        Event.$on("connection.toggle", () => {
-            this.currentConnection = !this.currentConnection;
-        });
+        ],
+        menus: {
+            connections: [
+                {icon: 'power', event: 'connection.spectators.disconnect', title: 'Disconnect Spectators'},
+                {icon: 'power', event: 'connection.players.disconnect', title: 'Disconnect Players'},
+                {icon: 'power', event: 'connection.all.disconnect', title: 'Disconnect All'}
+            ],
+            prizes: [
+                {icon: 'plus', event: 'prizes.new', title: 'Add New Prize'},
+                {icon: 'trophy-variant-outline', event: 'prizes.winner.new', title: 'New Winner'},
+                {icon: 'refresh', event: 'prizes.reset', title: 'Reset Prizes'}
+            ],
+            server: [
+                {icon: 'autorenew', event: 'server.restart', title: 'Restart Server'}
+            ],
+        }
     },
 
     methods: {
@@ -60,14 +86,13 @@ const app = new Vue({
         serverRestart(e) {},
         serverStop(e) {},
         // Connection Control Methods
-        disconnectSpectators(e) {
-            this.disconnect(e, 'spectators')
+        disconnectSpectators() {
+            this.disconnect('spectators')
         },
-        disconnectPlayers(e) {
-            this.disconnect(e, 'players')
+        disconnectPlayers() {
+            this.disconnect('players')
         },
-        disconnect(e, group) {
-            e.preventDefault();
+        disconnect(group) {
             group = group || 'all';
             console.log('Disconnect ' + group);
         }
