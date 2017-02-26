@@ -18,7 +18,7 @@ class CommandException extends Fluent implements ServerCommand
     {
         $this->exception = get_class($exception);
         $this->message   = $exception->getMessage();
-        $this->code      = $exeption->getCode() ? $exception->getCode() : 400;
+        $this->code      = $exception->getCode() ? $exception->getCode() : 400;
     }
 
     /**
