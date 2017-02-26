@@ -5,6 +5,7 @@ namespace App\Server\Commands;
 use App\Server\Contracts\Listener;
 use App\Server\Contracts\ServerCommand;
 use Illuminate\Support\Fluent;
+use Exception;
 
 class CommandException extends Fluent implements ServerCommand
 {
