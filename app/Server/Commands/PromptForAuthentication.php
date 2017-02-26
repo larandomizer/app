@@ -21,6 +21,18 @@ class PromptForAuthentication extends Fluent implements ServerCommand
     }
 
     /**
+     * Get or set the connection listener.
+     *
+     * @param \App\Server\Contracts\Listener $interface for the server
+     *
+     * @return \App\Server\Contracts\Listener|self
+     */
+    public function listener(Listener $interface = null)
+    {
+        return $this->dynamic('listener', $interface);
+    }
+
+    /**
      * Handle the command.
      */
     public function handle()
