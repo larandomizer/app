@@ -17,6 +17,8 @@ interface Command extends Jsonable
 
     /**
      * Handle the command.
+     *
+     * @return mixed
      */
     public function handle();
 }
