@@ -3,6 +3,7 @@
 namespace App\Server\Commands;
 
 use App\Server\Contracts\ClientCommand;
+use App\Server\Contracts\Listener;
 use App\Server\Contracts\ServerCommand;
 use Illuminate\Support\Fluent;
 
