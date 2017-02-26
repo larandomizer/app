@@ -5,10 +5,15 @@ namespace App\Server\Commands;
 use App\Server\Contracts\ClientCommand;
 use App\Server\Contracts\Listener;
 use App\Server\Contracts\ServerCommand;
+use App\Server\Traits\DynamicProperties;
 use Illuminate\Support\Fluent;
 
 class PromptForAuthentication extends Fluent implements ServerCommand
 {
+    use DynamicProperties;
+
+    protected $listener;
+
     /**
      * Prompt for authentication before authorizing the previous client command.
      *

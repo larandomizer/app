@@ -6,12 +6,14 @@ use App\Server\Contracts\ClientCommand;
 use App\Server\Contracts\Connection;
 use App\Server\Contracts\Listener;
 use App\Server\Contracts\ServerCommand;
+use App\Server\Traits\DynamicProperties;
 use Illuminate\Support\Fluent;
 
 class StopServer extends Fluent implements ClientCommand, ServerCommand
 {
     use DynamicProperties;
 
+    protected $listener;
     protected $client;
 
     /**

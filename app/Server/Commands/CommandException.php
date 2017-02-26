@@ -4,11 +4,16 @@ namespace App\Server\Commands;
 
 use App\Server\Contracts\Listener;
 use App\Server\Contracts\ServerCommand;
-use Illuminate\Support\Fluent;
+use App\Server\Traits\DynamicProperties;
 use Exception;
+use Illuminate\Support\Fluent;
 
 class CommandException extends Fluent implements ServerCommand
 {
+    use DynamicProperties;
+
+    protected $listener;
+
     /**
      * Wrap an exception as a command.
      *
