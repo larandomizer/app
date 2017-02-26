@@ -1,7 +1,7 @@
 {
-    "name": "laravel/laravel",
-    "description": "The Laravel Framework.",
-    "keywords": ["framework", "laravel"],
+    "name": "larandomizer/app",
+    "description": "The Laravel application that you install and deploy that includes all necessary ReactPHP components as dependencies.",
+    "keywords": ["framework", "laravel", "randomizer", "reactphp", "async"],
     "license": "MIT",
     "type": "project",
     "require": {
@@ -9,9 +9,11 @@
         "cboden/ratchet": "~0.3.6",
         "laravel/framework": "5.4.*",
         "laravel/tinker": "~1.0",
-        "pda/pheanstalk": "~3.0"
+        "pda/pheanstalk": "~3.0",
+        "ramsey/uuid": "^3.5"
     },
     "require-dev": {
+        "friendsofphp/php-cs-fixer": "2.0.0-alpha",
         "fzaninotto/faker": "~1.4",
         "laravel/homestead": "^4.0",
         "mockery/mockery": "0.9.*",
@@ -31,6 +33,14 @@
         }
     },
     "scripts": {
+        "fix": [
+            "vendor/bin/php-cs-fixer fix -v"
+        ],
+        "test": [
+            "touch database/database.sqlite",
+            "vendor/bin/phpunit --colors=always",
+            "vendor/bin/php-cs-fixer fix -v --diff --dry-run;"
+        ],
         "post-root-package-install": [
             "php -r \"file_exists('.env') || copy('.env.example', '.env');\""
         ],

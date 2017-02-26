@@ -1,47 +1,15 @@
 <?php
 
-namespace App\Server;
+namespace App\Server\Contracts;
 
-use App\Server\Contracts\Listener as ListenerInterface;
-use App\Server\Contracts\Server as ServerInterface;
-use App\Server\Traits\DynamicProperties;
 use Illuminate\Contracts\Queue\Queue;
-use Illuminate\Support\Facades\Queue as QueueManager;
 use Ratchet\Http\HttpServer;
 use Ratchet\Server\IoServer;
 use Ratchet\WebSocket\WsServer;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Server implements ServerInterface
+interface Server
 {
-    use DynamicProperties;
-
-    protected $address = '0.0.0.0';
-    protected $connector;
-    protected $http;
-    protected $listener;
-    protected $max_connections;
-    protected $output;
-    protected $port = 8080;
-    protected $queue = 'default';
-    protected $server;
-    protected $websocket;
-
-    /**
-     * Make a new instance of the server.
-     *
-     * @return self
-     */
-    public static function make()
-    {
-        $server = app(static::class)
-            ->listener(new Listener(new Connections()));
-
-        return $server->websocket(new WsServer($server->listener()))
-            ->http(new HttpServer($server->websocket()))
-            ->server(IoServer::factory($server->http(), $server->port(), $server->address()));
-    }
-
     /**
      * Set the bindings for the server.
      *
@@ -54,35 +22,17 @@ class Server implements ServerInterface
      *
      * @return self
      */
-    public function bind($address, $port = null)
-    {
-        if (is_array($address)) {
-            list($address, $port) = $address;
-        }
-
-        $this->address($address);
-        $this->port($port);
-
-        return $this;
-    }
+    public function bind($address, $port = null);
 
     /**
      * Start the server by running the event loop.
      */
-    public function start()
-    {
-        $this->listener()->start();
-        $this->server()->run();
-    }
+    public function start();
 
     /**
      * Stop the server by stopping the event loop.
      */
-    public function stop()
-    {
-        $this->listener()->stop();
-        $this->server()->loop->stop();
-    }
+    public function stop();
 
     /**
      * Get or set the password the server accepts for admin commands.
@@ -94,10 +44,7 @@ class Server implements ServerInterface
      *
      * @return string|self
      */
-    public function password($password = null)
-    {
-        return $this->dynamic('password', $password);
-    }
+    public function password($password = null);
 
     /**
      * Get or set the address the server binds to.
@@ -109,10 +56,7 @@ class Server implements ServerInterface
      *
      * @return string|self
      */
-    public function address($ip4 = null)
-    {
-        return $this->dynamic('address', $ip4);
-    }
+    public function address($ip4 = null);
 
     /**
      * Get or set the port the server listens on.
@@ -124,10 +68,7 @@ class Server implements ServerInterface
      *
      * @return string|self
      */
-    public function port($number = null)
-    {
-        return $this->dynamic('port', $number);
-    }
+    public function port($number = null);
 
     /**
      * Get or set the bindings for the server.
@@ -142,18 +83,7 @@ class Server implements ServerInterface
      *
      * @return array|self
      */
-    public function bindings($address = null, $port = null)
-    {
-        if ( ! is_null($address)) {
-            $this->bind($address, $port);
-        }
-
-        if (empty(func_get_args())) {
-            return [$this->address, $this->port];
-        }
-
-        return $this;
-    }
+    public function bindings($address = null, $port = null);
 
     /**
      * Get or set the queue the server processes.
@@ -165,10 +95,7 @@ class Server implements ServerInterface
      *
      * @return string|self
      */
-    public function queue($name = null)
-    {
-        return $this->dynamic('queue', $name);
-    }
+    public function queue($name = null);
 
     /**
      * Set the queue the server processes.
@@ -183,20 +110,7 @@ class Server implements ServerInterface
      *
      * @return self
      */
-    public function useQueue($connection = null, $name = null)
-    {
-        if ( ! $connection instanceof Queue) {
-            $connection = QueueManager::connection($connection);
-        }
-
-        $this->connector($connection);
-        $this->queue($name);
-
-        // @todo the connection and queue need to be passed to the listener
-        // @todo the loop needs to have a queue worker added to it
-
-        return $this;
-    }
+    public function useQueue($connection = null, $name = null);
 
     /**
      * Get or set the maximum number of connections the server allows to connect.
@@ -208,13 +122,7 @@ class Server implements ServerInterface
      *
      * @return int|self
      */
-    public function maxConnections($number = null)
-    {
-
-        // @todo max connections needs to be passed to listener
-
-        return $this->dynamic('max_connections', $number);
-    }
+    public function maxConnections($number = null);
 
     /**
      * Get or set the queue connector the server uses.
@@ -226,10 +134,7 @@ class Server implements ServerInterface
      *
      * @return \Illuminate\Contracts\Queue\Queue|self
      */
-    public function connector(Queue $instance = null)
-    {
-        return $this->dynamic('connector', $instance);
-    }
+    public function connector(Queue $instance = null);
 
     /**
      * Get or set the event listener the server uses.
@@ -241,10 +146,7 @@ class Server implements ServerInterface
      *
      * @return \App\Server\Contracts\Listener|self
      */
-    public function listener(ListenerInterface $instance = null)
-    {
-        return $this->dynamic('listener', $instance);
-    }
+    public function listener(Listener $instance = null);
 
     /**
      * Get or set the WebSocket instance the server uses.
@@ -256,10 +158,7 @@ class Server implements ServerInterface
      *
      * @return \Ratchet\WebSocket\WsServer|self
      */
-    public function websocket(WsServer $instance = null)
-    {
-        return $this->dynamic('websocket', $instance);
-    }
+    public function websocket(WsServer $instance = null);
 
     /**
      * Get or set the HTTP instance the server uses.
@@ -271,10 +170,7 @@ class Server implements ServerInterface
      *
      * @return \Ratchet\Http\HttpServer|self
      */
-    public function http(HttpServer $instance = null)
-    {
-        return $this->dynamic('http', $instance);
-    }
+    public function http(HttpServer $instance = null);
 
     /**
      * Get or set the I/O instance the server uses.
@@ -286,14 +182,7 @@ class Server implements ServerInterface
      *
      * @return \Ratchet\Server\IoServer|self
      */
-    public function server(IoServer $instance = null)
-    {
-        if ( ! is_null($instance)) {
-            $this->listener()->loop($instance->loop);
-        }
-
-        return $this->dynamic('server', $instance);
-    }
+    public function server(IoServer $instance = null);
 
     /**
      * Get or set the output interface the server pipes output to.
@@ -305,12 +194,5 @@ class Server implements ServerInterface
      *
      * @return \Symfony\Component\Console\Output\OutputInterface|self
      */
-    public function output(OutputInterface $interface = null)
-    {
-        if ( ! is_null($interface)) {
-            $this->listener()->output($interface);
-        }
-
-        return $this->dynamic('output', $interface);
-    }
+    public function output(OutputInterface $interface = null);
 }

@@ -3,6 +3,7 @@
          backupStaticAttributes="false"
          bootstrap="bootstrap/autoload.php"
          colors="true"
+         verbose="true"
          convertErrorsToExceptions="true"
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
@@ -24,8 +25,17 @@
     </filter>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <env name="DB_CONNECTION" value="sqlite"/>
         <env name="CACHE_DRIVER" value="array"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="QUEUE_DRIVER" value="sync"/>
     </php>
+    <logging>
+        <log type="coverage-clover" target="./storage/coverage/logs/clover.xml"/>
+        <log type="coverage-html" target="./storage/coverage/coverage" charset="UTF-8" yui="true" highlight="true"/>
+        <log type="coverage-text" target="./storage/coverage/coverage.txt"/>
+        <log type="json" target="./storage/coverage/report.json"/>
+        <log type="junit" target="./storage/coverage/report.junit.xml"/>
+        <log type="tap" target="./storage/coverage/report.tap"/>
+    </logging>
 </phpunit>
