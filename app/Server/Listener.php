@@ -61,7 +61,7 @@ class Listener implements ListenerInterface, RatchetInterface
      */
     public function open(Connection $connection)
     {
-        $this->connections->add($connection);
+        $this->connections->put($connection->uuid(), $connection);
 
         return $this;
     }
