@@ -2,6 +2,7 @@
 
 namespace App\Server\Traits;
 
+use App\Server\Connection;
 use Ratchet\ConnectionInterface;
 
 trait RatchetAdapter
