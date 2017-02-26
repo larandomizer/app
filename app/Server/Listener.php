@@ -2,6 +2,8 @@
 
 namespace App\Server;
 
+use App\Server\Commands\CommandException;
+use App\Server\Commands\PromptForAuthentication;
 use App\Server\Contracts\Command;
 use App\Server\Contracts\Connection;
 use App\Server\Contracts\Listener as ListenerInterface;
