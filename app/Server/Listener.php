@@ -4,6 +4,7 @@ namespace App\Server;
 
 use App\Server\Commands\CommandException;
 use App\Server\Commands\PromptForAuthentication;
+use App\Server\Contracts\ClientCommand;
 use App\Server\Contracts\Command;
 use App\Server\Contracts\Connection;
 use App\Server\Contracts\Listener as ListenerInterface;
@@ -81,7 +82,7 @@ class Listener implements ListenerInterface, RatchetInterface
     {
         $connection->send($command->id(Uuid::uuid4()->toString())
             ->name(class_basename($command))
-            ->timestamp(microtime())
+            ->timestamp(microtime(true))
             ->toJson());
 
         if ( ! $silent) {
@@ -248,7 +249,7 @@ class Listener implements ListenerInterface, RatchetInterface
     }
 
     /**
-     * Log to the output.
+     * Log to the output. @todo could use some refactoring.
      *
      * @param mixed $message that can be cast to a string
      *
@@ -256,7 +257,27 @@ class Listener implements ListenerInterface, RatchetInterface
      */
     public function log($message)
     {
-        $this->output()->writeln((string) $message);
+        if ($message instanceof Exception) {
+            $this->output()->writeln($message->toString());
+
+            return $this;
+        }
+
+        if ($message instanceof Command) {
+            $this->output()->writeln($message->toJson());
+
+            return $this;
+        }
+
+        if (is_array($message)) {
+            $this->output()->writeln(json_encode($message));
+        }
+
+        if (is_string($message)) {
+            $this->output()->writeln($message);
+
+            return $this;
+        }
 
         return $this;
     }
@@ -272,7 +293,7 @@ class Listener implements ListenerInterface, RatchetInterface
     {
         $arguments = (array) json_decode($message, true);
         $name = array_get($arguments, 'name');
-        $class = str_replace(class_basename($this), '\\Command\\'.$name);
+        $class = str_replace(class_basename($this), 'Commands\\'.$name, get_class($this));
         if ( ! class_exists($class)) {
             throw new InvalidArgumentException($class.' does not exist.');
         }

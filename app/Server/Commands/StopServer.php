@@ -23,7 +23,7 @@ class StopServer extends Fluent implements ClientCommand, ServerCommand
      */
     public function authorize()
     {
-        return $this->connection()->is_admin;
+        return $this->client()->isAdmin();
     }
 
     /**

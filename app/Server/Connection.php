@@ -121,4 +121,14 @@ class Connection implements ConnectionInterface
     {
         $this->socket()->close();
     }
+
+    /**
+     * Check if the connection is an admin connection.
+     *
+     * @return bool
+     */
+    public function isAdmin()
+    {
+        return false; // @todo should check if connection password matches server
+    }
 }
