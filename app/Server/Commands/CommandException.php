@@ -12,7 +12,7 @@ class CommandException extends Fluent implements ServerCommand
      *
      * @param \Exception $exception
      */
-    public function __constructor(Exception $exception)
+    public function __construct(Exception $exception)
     {
         $this->exception = get_class($exception);
         $this->message   = $exception->getMessage();

@@ -13,7 +13,7 @@ class PromptForAuthentication extends Fluent implements ServerCommand
      *
      * @param \App\Server\Contracts\ClientCommand $command
      */
-    public function __constructor(ClientCommand $command)
+    public function __construct(ClientCommand $command)
     {
         $this->previous_command = $command;
         $this->message          = 'Authorization required.';

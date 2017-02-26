@@ -11,13 +11,19 @@ class Connection implements ConnectionInterface
 {
     use DynamicProperties;
 
+    protected $email;
+    protected $socket;
+    protected $type;
+    protected $username;
+    protected $uuid;
+
     /**
      * Inject a Ratchet connection as the proxy of this connection.
      */
-    public function __constructor(SocketInterface $instance)
+    public function __construct(SocketInterface $instance)
     {
         $this->socket($instance);
-        $this->uuid(Uuid::uuid4());
+        $this->uuid(Uuid::uuid4()->toString());
         $this->type(ConnectionInterface::ANONYMOUS);
     }
 

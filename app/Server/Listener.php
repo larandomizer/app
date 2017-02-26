@@ -77,7 +77,7 @@ class Listener implements ListenerInterface, RatchetInterface
      */
     public function send(Command $command, Connection $connection, $silent = false)
     {
-        $connection->send($command->id(Uuid::uuid4())
+        $connection->send($command->id(Uuid::uuid4()->toString())
             ->name(base_classname($command))
             ->timestamp(microtime())
             ->toJson());
