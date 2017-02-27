@@ -3,7 +3,7 @@
 namespace App\Http\Apis;
 
 use App\Server\Commands\CloseConnections;
-use App\Server\Commands\DismissNotificationsFor;
+use App\Server\Commands\DismissNotifications;
 use App\Server\Commands\NotifyConnection;
 use App\Server\Traits\WebsocketQueue;
 
@@ -18,7 +18,7 @@ class Connection extends Api
 
     public function dismissNotifications($uuid)
     {
-        $this->queue(new DismissNotificationsFor(compact('uuid')));
+        $this->queue(new DismissNotifications(compact('uuid')));
     }
 
     public function disconnect($uuid)

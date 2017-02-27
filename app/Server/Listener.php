@@ -24,17 +24,20 @@ class Listener implements ListenerInterface, RatchetInterface
     protected $connections;
     protected $loop;
     protected $output;
+    protected $prizes;
 
     /**
      * Inject and setup the dependencies.
      *
      * @param \App\Server\Connections                           $connections
      * @param \Symfony\Component\Console\Output\OutputInterface $output
+     * @param \App\Server\Prizes                                $prizes
      */
-    public function __construct(Connections $connections, OutputInterface $output = null)
+    public function __construct(Connections $connections, OutputInterface $output = null, Prizes $prizes = null)
     {
         $this->connections($connections);
         $this->output($output);
+        $this->prizes($prizes ?: new Prizes());
     }
 
     /**
@@ -64,7 +67,10 @@ class Listener implements ListenerInterface, RatchetInterface
      */
     public function open(Connection $connection)
     {
-        $this->connections->put($connection->uuid(), $connection);
+        $this->connections()->put($connection->uuid(), $connection);
+
+        $this->send(new UpdatePrizes($this->prizes()), $connection)
+            ->broadcast(new UpdateConnections($this->connections()), $this->connections());
 
         return $this;
     }
@@ -174,7 +180,9 @@ class Listener implements ListenerInterface, RatchetInterface
      */
     public function close(Connection $connection, $silent = false)
     {
-        $this->connections->forget($connection->id);
+        $this->connections()->forget($connection);
+
+        $this->broadcast(new UpdateConnections($this->connections()), $this->connections());
 
         if ( ! $silent) {
             $this->log($connection);
@@ -216,6 +224,21 @@ class Listener implements ListenerInterface, RatchetInterface
     public function connections(Connections $connections = null)
     {
         return $this->dynamic('connections', $connections);
+    }
+
+    /**
+     * Get or set the prizes on the server.
+     *
+     * @example prizes() ==> \App\Server\Prizes
+     *          prizes($prizes) ==> self
+     *
+     * @param \App\Server\Prizes $prizes
+     *
+     * @return \App\Server\Prizes|self
+     */
+    public function prizes(Prizes $prizes = null)
+    {
+        return $this->dynamic('prizes', $prizes);
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Server\Contracts;
 
 use App\Server\Connections;
+use App\Server\Prizes;
 use Exception;
 
 interface Listener
@@ -93,4 +94,37 @@ interface Listener
      * @return self
      */
     public function error(Connection $connection, Exception $exception, $silent = false);
+
+    /**
+     * Get or set the connections on the server.
+     *
+     * @example connections() ==> \App\Server\Connections
+     *          connections($connections) ==> self
+     *
+     * @param \App\Server\Connections $connections
+     *
+     * @return \App\Server\Connections|self
+     */
+    public function connections(Connections $connections = null);
+
+    /**
+     * Get or set the prizes on the server.
+     *
+     * @example prizes() ==> \App\Server\Prizes
+     *          prizes($prizes) ==> self
+     *
+     * @param \App\Server\Prizes $prizes
+     *
+     * @return \App\Server\Prizes|self
+     */
+    public function prizes(Prizes $prizes = null);
+
+    /**
+     * Log to the output. @todo could use some refactoring.
+     *
+     * @param mixed $message that can be cast to a string
+     *
+     * @return self
+     */
+    public function log($message);
 }

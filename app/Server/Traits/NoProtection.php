@@ -2,8 +2,6 @@
 
 namespace App\Server\Traits;
 
-use App\Server\Traits\Client;
-
 trait NoProtection
 {
     use Client;

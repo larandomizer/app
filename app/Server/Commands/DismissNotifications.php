@@ -7,7 +7,7 @@ use App\Server\Contracts\ClientCommand;
 use App\Server\Contracts\ServerCommand;
 use App\Server\Traits\ClientProtection;
 
-class DismissNotificationsFor extends Command implements ClientCommand, ServerCommand
+class DismissNotifications extends Command implements ClientCommand, ServerCommand
 {
     use ClientProtection;
 
@@ -28,14 +28,20 @@ class DismissNotificationsFor extends Command implements ClientCommand, ServerCo
      */
     public function handle()
     {
-        if( ! $this->client() ) {
+        if ( ! $this->client()) {
             $this->client($this->listener()
                 ->connections()
                 ->uuid($this->uuid));
         }
 
-        if( $this->authorize() ) {
-            return $this->client()->notifications([]);
+        if ($this->authorize()) {
+            $this->client()->notifications([]);
+
+            return $this->listener()
+                ->send(
+                    new UpdateNotifications($this->client()->notifications()),
+                    $this->client()
+                );
         }
     }
 }

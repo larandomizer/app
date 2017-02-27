@@ -3,6 +3,7 @@
 namespace App\Server;
 
 use App\Server\Contracts\Connection as ConnectionInterface;
+use App\Server\Contracts\Prize;
 use App\Server\Traits\DynamicProperties;
 use Ramsey\Uuid\Uuid;
 use Ratchet\ConnectionInterface as SocketInterface;
@@ -14,7 +15,9 @@ class Connection implements ConnectionInterface
     protected $email;
     protected $socket;
     protected $type;
-    protected $username;
+    protected $name;
+    protected $notifications;
+    protected $prize;
     protected $uuid;
 
     /**
@@ -25,6 +28,7 @@ class Connection implements ConnectionInterface
         $this->socket($instance);
         $this->uuid(Uuid::uuid4()->toString());
         $this->type(ConnectionInterface::ANONYMOUS);
+        $this->notifications(new Notifications());
     }
 
     /**
@@ -40,6 +44,21 @@ class Connection implements ConnectionInterface
     public function socket(SocketInterface $interface = null)
     {
         return $this->dynamic('socket', $interface);
+    }
+
+    /**
+     * Get or set the notifications collection for the connection.
+     *
+     * @example notifications() ==> \App\Server\Notifications
+     *          notifications($collection) ==> self
+     *
+     * @param \App\Server\Notifications $collection
+     *
+     * @return \App\Server\Notifications|self
+     */
+    public function notifications(Notifications $collection = null)
+    {
+        return $this->dynamic('notifications', $collection);
     }
 
     /**
@@ -88,18 +107,33 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * Get or set the username registered for the connection.
+     * Get or set the name registered for the connection.
      *
-     * @example username() ==> string
-     *          username($username) ==> self
+     * @example name() ==> string
+     *          name($name) ==> self
      *
-     * @param string $username
+     * @param string $name
      *
      * @return string|self
      */
-    public function username($username = null)
+    public function name($name = null)
     {
-        return $this->dynamic('username', $username);
+        return $this->dynamic('name', $name);
+    }
+
+    /**
+     * Get or set the prize the connection won.
+     *
+     * @example prize() ==> \App\Server\Contracts\Prize
+     *          prize($prize) ==> self
+     *
+     * @param \App\Server\Contracts\Prize $prize
+     *
+     * @return \App\Server\Contracts\Prize|self
+     */
+    public function prize(Prize $prize = null)
+    {
+        return $this->dynamic('prize', $prize);
     }
 
     /**

@@ -2,10 +2,10 @@
 
 namespace App\Server\Commands;
 
-use App\Server\Notification;
 use App\Server\Command;
 use App\Server\Contracts\ClientCommand;
 use App\Server\Contracts\ServerCommand;
+use App\Server\Notification;
 use App\Server\Traits\NoProtection;
 
 class NotifyConnection extends Command implements ClientCommand, ServerCommand
@@ -39,6 +39,9 @@ class NotifyConnection extends Command implements ClientCommand, ServerCommand
             ->put($notification->sender(), $notification);
 
         return $this->listener()
-            ->send($notification, $connection);
+            ->send(
+                new UpdateNotifications($connection->notifications()),
+                $connection
+            );
     }
 }

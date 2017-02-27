@@ -8,6 +8,28 @@ use Ratchet\ConnectionInterface;
 class Connections extends Collection
 {
     /**
+     * Filter connections to those with the registered type.
+     *
+     * @param string|array $topics
+     *
+     * @return self
+     */
+    public function type($types = null)
+    {
+        if (is_null($types) || empty($types)) {
+            return $this;
+        }
+
+        if ( ! is_array($types)) {
+            $types = [$types];
+        }
+
+        return $this->filter(function ($connection) use ($types) {
+            return in_array($connection->type(), $types);
+        });
+    }
+
+    /**
      * Filter connections to those subscribed to the topics.
      *
      * @param string|array $topics
@@ -40,6 +62,20 @@ class Connections extends Collection
     {
         return $this->first(function ($connection) use ($socket) {
             return $connection->socket() === $socket;
+        });
+    }
+
+    /**
+     * Get the first connection that matches the UUID.
+     *
+     * @param string $uuid
+     *
+     * @return \App\Server\Contracts\Connection|null
+     */
+    public function uuid($uuid)
+    {
+        return $this->first(function ($connection) use ($uuid) {
+            return $connection->uuid() === $uuid;
         });
     }
 }
