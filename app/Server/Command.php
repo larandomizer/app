@@ -5,13 +5,13 @@ namespace App\Server;
 use App\Server\Contracts\Command as CommandInterface;
 use App\Server\Contracts\Listener;
 use App\Server\Traits\DynamicProperties;
-use Illuminate\Bus\Queuable;
+use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Fluent;
 
 abstract class Command extends Fluent implements CommandInterface, ShouldQueue
 {
-    use DynamicProperties, Queuable;
+    use DynamicProperties, Queueable;
 
     protected $listener;
 

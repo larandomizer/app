@@ -210,10 +210,14 @@ class Server implements ServerInterface
      */
     public function maxConnections($number = null)
     {
+        if (is_null($number)) {
+            return $this->dynamic('max_connections', $number);
+        }
 
+        $this->dynamic('max_connections', $number);
         // @todo max connections needs to be passed to listener
 
-        return $this->dynamic('max_connections', $number);
+        return $this;
     }
 
     /**

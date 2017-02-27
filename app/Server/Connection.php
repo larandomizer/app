@@ -165,4 +165,9 @@ class Connection implements ConnectionInterface
     {
         return false; // @todo should check if connection password matches server
     }
+
+    public function topics()
+    {
+        return [];
+    }
 }

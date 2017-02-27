@@ -2,6 +2,8 @@
 
 namespace App\Server;
 
+use App\Server\Commands\UpdatePrizes;
+use App\Server\Commands\UpdateConnections;
 use App\Server\Commands\CommandException;
 use App\Server\Commands\PromptForAuthentication;
 use App\Server\Contracts\ClientCommand;
