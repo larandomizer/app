@@ -13,16 +13,16 @@ class Prize extends Api
 
     public function add()
     {
-        $this->queue(new AddPrize(request()->all()));
+        $this->queue(new AddPrize(request()->only('name', 'sponsor')));
     }
 
     public function reset()
     {
-        $this->queue(new ResetPrizes(request()->all()));
+        $this->queue(new ResetPrizes());
     }
 
     public function giveaway()
     {
-        $this->queue(new PickRandomWinner(request()->all()));
+        $this->queue(new PickRandomWinner());
     }
 }

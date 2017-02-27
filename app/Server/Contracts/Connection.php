@@ -11,6 +11,7 @@ interface Connection extends ConnectionInterface
     const PLAYER    = 'player';
     const SPECTATOR = 'spectator';
     const WINNER    = 'winner';
+    const LOSER     = 'loser';
 
     /**
      * Get or set the socket for the connection.

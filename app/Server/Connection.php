@@ -163,7 +163,7 @@ class Connection implements ConnectionInterface
      */
     public function isAdmin()
     {
-        return false; // @todo should check if connection password matches server
+        return $this->admin(); // @todo should check if connection password matches server
     }
 
     public function topics()

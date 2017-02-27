@@ -71,7 +71,8 @@ class Listener implements ListenerInterface, RatchetInterface
     {
         $this->connections()->put($connection->uuid(), $connection);
 
-        $this->send(new UpdatePrizes($this->prizes()), $connection)
+        $this->send(new ConnectionEstablished($connection), $connection)
+            ->send(new UpdatePrizes($this->prizes()), $connection)
             ->broadcast(new UpdateConnections($this->connections()), $this->connections());
 
         return $this;
@@ -130,7 +131,7 @@ class Listener implements ListenerInterface, RatchetInterface
     public function broadcast(Command $command, Connections $connections, $silent = false)
     {
         $connections
-            ->topic($command->topics())
+            ->topic($command->topics() ?: [])
             ->each(function ($connection) use ($command) {
                 $this->send($command, $connection, true);
             });

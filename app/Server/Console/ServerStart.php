@@ -57,7 +57,7 @@ class ServerStart extends Command
         Server::make()
             ->bind($this->option('address'), $this->option('port'))
             ->useQueue($this->option('connection'), $this->option('queue'))
-            ->maxConnections($this->option('max'))
+            ->maxConnections($this->option('max', 0))
             ->password($this->option('key'))
             ->output($this->getOutput())
             ->start();
