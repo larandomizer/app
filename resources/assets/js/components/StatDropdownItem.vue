@@ -18,7 +18,7 @@
                 return '#' + this.anchor;
             },
             anchor() {
-                return this.event.replace('.', '-').toLowerCase();
+                return this.event.replace(/[\.\_]+/g, '-').toLowerCase();
             }
         },
         props: ['event', 'icon', 'title'],
