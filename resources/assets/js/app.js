@@ -129,14 +129,14 @@ const app = new Vue({
                 {icon: 'autorenew', event: 'server.restart', title: 'Restart Server'}
             ],
         },
-        columns: [
-            { name: 'Name', key: 'name', width: '' },
-            { name: 'Email', key: 'email', width: '' },
-            { name: 'Connection', key: 'uuid', width: '' },
-            { name: 'IP Address', key: 'ip_address', width: '' },
-            { name: 'Time', key: 'timestamp', width: '' },
-            { name: 'Status', key: 'type', width: '80' }
-        ],
+        columns: {
+            'name': 'Name',
+            'email': 'Email',
+            'uuid': 'Connection',
+            'ipAddress': 'IP Address',
+            'timestamp': 'Time',
+            'type': 'Status'
+        }
     },
 
     methods: {

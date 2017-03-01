@@ -88,6 +88,20 @@ interface Connection extends ConnectionInterface
     public function name($name = null);
 
     /**
+     * Get or set the client IP Address for the connection.
+     *
+     * @example ipAddress() ==> string
+     *          ipAddress($name) ==> self
+     *
+     * @param string $ipAddress
+     *
+     * @return string|self
+     */
+    public function ipAddress($ipAddress = null);
+
+
+
+    /**
      * Get or set that the connection is admin privileged.
      *
      * @example admin() ==> true

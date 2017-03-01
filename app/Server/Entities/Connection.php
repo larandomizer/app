@@ -26,14 +26,18 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
     protected $subscriptions;
     protected $type;
     protected $uuid;
+    protected $ipAddress;
 
     /**
      * Inject a Ratchet connection as the proxy of this connection.
+     *
+     * @param \Ratchet\ConnectionInterface $instance
      */
     public function __construct(SocketInterface $instance)
     {
         $this->socket($instance);
         $this->uuid(Uuid::uuid4()->toString());
+        $this->ipAddress($instance->remoteAddress);
         $this->type(ConnectionInterface::ANONYMOUS);
         $this->notifications(new Notifications());
         $this->subscriptions(new Topics());
@@ -46,7 +50,7 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
      * @example socket() ==> \Ratchet\ConnectionInterface
      *          socket($interface) ==> self
      *
-     * @param \Ratchet\ConnectionInterface $instance
+     * @param \Ratchet\ConnectionInterface $interface
      *
      * @return \Ratchet\ConnectionInterface|self
      */
@@ -133,6 +137,21 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
     public function name($name = null)
     {
         return $this->property(__METHOD__, $name);
+    }
+
+    /**
+     * Get or set the client IP Address for the connection.
+     *
+     * @example ipAddress() ==> string
+     *          ipAddress($name) ==> self
+     *
+     * @param string $ipAddress
+     *
+     * @return string|self
+     */
+    public function ipAddress($ipAddress = null)
+    {
+        return $this->property(__METHOD__, $ipAddress);
     }
 
     /**
@@ -239,6 +258,7 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
             'notifications' => $this->notifications->toArray(),
             'subscriptions' => $this->subscriptions->toArray(),
             'prize'         => $this->prize ? $this->prize->toArray() : null,
+            'ipAddress'     => $this->ipAddress,
         ]);
     }
 }
