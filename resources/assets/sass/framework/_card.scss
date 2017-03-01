@@ -6,35 +6,75 @@
 
 // Card Stat
 .card-stat {
-  padding: 2rem;
+  padding: 1rem;
   position: relative;
+
+  @media (min-width: 576px) and (max-width: 767px) {
+    text-align: center;
+    width: 100%;
+  }
+
+  @media (min-width: 992px) {
+    padding: 2rem;
+  }
 
   // Icon
   .card-icon {
     border-radius: 50%;
     font-size: 24px;
     float: left;
-    height: 64px;
-    line-height: 64px;
     padding: 0;
     text-align: center;
-    width: 64px;
+    height: 48px;
+    line-height: 48px;
+    width: 48px;
+
+    @media (min-width: 576px) and (max-width: 767px) {
+      display: inline-block;
+      float: none;
+    }
+
+    @media (min-width: 992px) {
+      height: 64px;
+      line-height: 64px;
+      width: 64px;
+    }
   }
 
   // Details
   .card-details {
     float: left;
-    margin-left: 1.5rem;
+    margin-left: .5rem;
+    text-align: left;
+
+    @media (min-width: 576px) and (max-width: 767px) {
+      margin: 0;
+      text-align: center;
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      margin-left: 1.5rem;
+    }
   }
   .card-title {
     color: #4a4a4a;
     font-size: 24px;
     font-weight: bold;
-    margin-bottom: 1.25rem;
+    margin-bottom: 0.75rem;
     margin-top: .25rem;
+
+    @media (min-width: 992px) {
+      margin-bottom: 1.25rem;
+    }
   }
   .card-subtitle {
     color: #b3b3b3;
+    font-size: 0.8rem;
+
+    @media (min-width: 992px) {
+      font-size: 1rem;
+    }
   }
 
 }
