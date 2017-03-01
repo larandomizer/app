@@ -6,14 +6,22 @@
  */
 
 require('./bootstrap');
-window.Event = require('./lib/Event');
-window.Server = require('./lib/Server')(window.Event, document.location.host, document.location.port, '/socket/', document.location.protocol === 'https:');
 
-/**
- * Next, we will create a fresh Vue application instance and attach it to
- * the page. Then, you may begin adding components to this application
- * or customize the JavaScript scaffolding to fit your unique needs.
- */
+// -----
+
+window.Event = require('./lib/Event');
+
+let Broker = require('./lib/Broker');
+
+window.Server = new Broker(
+    window.Event,
+    document.location.host,
+    document.location.port,
+    '/socket/',
+    document.location.protocol === 'https:'
+);
+
+// -----
 
 Vue.component('stat-dropdown-item', require('./components/StatDropdownItem.vue'));
 Vue.component('stat-dropdown', require('./components/StatDropdown.vue'));
@@ -24,10 +32,13 @@ Vue.component('notifications', require('./components/Notifications.vue'));
 Vue.component('grid-col', require('./components/GridColumn.vue'));
 Vue.component('grid', require('./components/Grid.vue'));
 
+// -----
+
 const app = new Vue({
     el: '#app',
 
     created() {
+        // Server Messages
         Event.listen('ConnectionEstablished', message => {
             message.connection.timestamp = message.timestamp;
             this.connected = true;
@@ -48,38 +59,49 @@ const app = new Vue({
         Event.listen('CurrentUptime', message => {
             this.uptime = message.elapsed;
         });
+        Event.listen('AwardWinner', message => {
+            if (message.uuid === this.connection.uuid) {
+                this.showWinnerPrizeModal();
+            }
+        });
+
+        // Client Commands
+        Event.listen('notification.dismiss.all', () => {
+            console.log('Dismissing all notifications');
+        });
+        Event.listen('notification.send', connection => {
+            Server.send('NotifyConnection', {
+                sender: this.connection.uuid,
+                receiver: connection.uuid
+            });
+        });
         Event.listen('connection.disconnect', connection => {
+            console.log('Disconnect ' + connection.uuid);
             this.disconnect(connection.uuid);
         });
         Event.listen('connection.reconnect', connection => {
-            this.reconnect();
+            this.reconnect(connection.uuid);
         });
         Event.listen('connection.disconnect.players', () => {
-            this.disconnectPlayers();
+            console.log('Disconnect spectators');
         });
         Event.listen('connection.disconnect.spectators', () => {
-            this.disconnectSpectators();
+            console.log('Disconnect spectators');
         });
         Event.listen('connection.disconnect.all', () => {
-            this.disconnectAll();
-        });
-        Event.listen('notification.dismiss.all', () => {
-            this.dismissNotifications();
-        });
-        Event.listen('notification.send', connection => {
-            this.notifyConnection(connection.uuid);
+            console.log('Disconnect all connections');
         });
         Event.listen('server.restart', () => {
-            this.restartServer();
+            console.log('Restart server by sending StopServer message');
         });
         Event.listen('prizes.add', () => {
-            this.addPrize();
+            this.showAddPrizeModal();
         });
         Event.listen('prizes.pick_winner', () => {
-            this.pickRandomWinner();
+            Server.send('AwardWinner', {});
         });
         Event.listen('prizes.reset', () => {
-            this.resetPrizes();
+            console.log('Reset prizes');
         });
     },
 
@@ -154,50 +176,13 @@ const app = new Vue({
             console.log('Disconnect ' + uuid);
             this.connected = false;
         },
-        disconnectAll(type) {
-            console.log('Disconnect all');
-        },
-        disconnectType(type) {
-            console.log('Disconnect ' + type);
-        },
-        disconnectSpectators() {
-            this.disconnectType('spectator')
-        },
-        disconnectPlayers() {
-            this.disconnectType('player')
-        },
 
         // Prize Control Methods
         showAddPrizeModal() {
             console.log('Show add prize modal');
         },
-        addPrize() {
-            console.log('Add prize');
-        },
-        pickRandomWinner() {
-            console.log('Pick new random winner');
-        },
         showWinnerPrizeModal() {
             console.log('Show the winner what they won');
-        },
-        resetPrizes() {
-            console.log('Reset prizes');
-        },
-
-        // Server Control Methods
-        restartServer() {
-            console.log('Restart server by sending StopServer message');
-        },
-
-        // Notification Control Methods
-        notifyConnection(uuid) {
-            Server.send('NotifyConnection', {
-                sender: this.connection.uuid,
-                receiver: uuid
-            });
-        },
-        dismissNotifications() {
-            console.log('Dismissing all notifications');
         },
 
         // Auth Control Methods

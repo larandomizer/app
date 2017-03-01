@@ -1,3 +1,5 @@
+"use strict";
+
 class Event {
     /**
      * Constructor
@@ -39,6 +41,4 @@ class Event {
     }
 }
 
-const event = new Event();
-
-module.exports = event;
+module.exports = new Event();
