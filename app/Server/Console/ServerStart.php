@@ -59,7 +59,7 @@ class ServerStart extends Command
             ->useQueue($this->option('connection'), $this->option('queue'))
             ->maxConnections($this->option('max', 0))
             ->password($this->option('key'))
-            ->output($this->getOutput())
+            ->logger($this->getOutput())
             ->start();
     }
 }

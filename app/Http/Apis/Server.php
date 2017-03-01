@@ -11,6 +11,6 @@ class Server extends Api
 
     public function restart()
     {
-        $this->queue(new StopServer(request()->all()));
+        $this->queue(new StopServer());
     }
 }

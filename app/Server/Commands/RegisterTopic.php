@@ -3,9 +3,9 @@
 namespace App\Server\Commands;
 
 use App\Server\Entities\Command;
-use App\Server\Entities\Prize;
+use App\Server\Entities\Topic;
 
-class AddPrize extends Command
+class RegisterTopic extends Command
 {
     /**
      * Save the command arguments for later when the command is run.
@@ -15,7 +15,6 @@ class AddPrize extends Command
     public function __construct(array $arguments = [])
     {
         $this->name = array_get($arguments, 'name');
-        $this->sponsor = array_get($arguments, 'sponsor');
     }
 
     /**
@@ -23,11 +22,6 @@ class AddPrize extends Command
      */
     public function run()
     {
-        $prizes = $this->dispatcher()->prizes();
-        $prizes->push(new Prize($this->name, $this->sponsor));
-        $everyone = $this->dispatcher()->connections();
-
-        return $this->dispatcher()
-            ->broadcast(new UpdatePrizes($prizes), $everyone);
+        $this->dispatcher()->register(new Topic($this->name));
     }
 }

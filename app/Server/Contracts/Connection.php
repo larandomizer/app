@@ -2,7 +2,7 @@
 
 namespace App\Server\Contracts;
 
-use App\Server\Notifications;
+use App\Server\Entities\Topics;
 use Ratchet\ConnectionInterface;
 
 interface Connection extends ConnectionInterface
@@ -26,16 +26,18 @@ interface Connection extends ConnectionInterface
     public function socket(ConnectionInterface $interface = null);
 
     /**
-     * Get or set the notifications collection for the connection.
+     * Send data to the connection.
      *
-     * @example notifications() ==> \App\Server\Notifications
-     *          notifications($collection) ==> self
+     * @param string $data
      *
-     * @param \App\Server\Notifications $collection
-     *
-     * @return \App\Server\Notifications|self
+     * @return \App\Server\Contracts\Connection
      */
-    public function notifications(Notifications $collection = null);
+    public function send($data);
+
+    /**
+     * Close the connection.
+     */
+    public function close();
 
     /**
      * Get or set the UUID of the connection.
@@ -86,28 +88,44 @@ interface Connection extends ConnectionInterface
     public function name($name = null);
 
     /**
-     * Get or set the prize the connection won.
+     * Get or set that the connection is admin privileged.
      *
-     * @example prize() ==> \App\Server\Contracts\Prize
-     *          prize($prize) ==> self
+     * @example admin() ==> true
+     *          admin(true) ==> self
      *
-     * @param \App\Server\Contracts\Prize $prize
+     * @param bool $privileged
      *
-     * @return \App\Server\Contracts\Prize|self
+     * @return bool|self
      */
-    public function prize(Prize $prize = null);
+    public function admin($privileged = null);
 
     /**
-     * Send data to the connection.
+     * Get or set the topics the connection subscribes to.
      *
-     * @param string $data
+     * @example subscriptions() ==> \App\Server\Entities\Topics
+     *          subscriptions($topics) ==> self
      *
-     * @return \App\Server\Contracts\Connection
+     * @param \App\Server\Entities\Topics $topics
+     *
+     * @return \App\Server\Entities\Topics|self
      */
-    public function send($data);
+    public function subscriptions(Topics $topics = null);
 
     /**
-     * Close the connection.
+     * Add a topic that the connection subscribes to.
+     *
+     * @param \App\Server\Contracts\Topic $topic to subscribe to.
+     *
+     * @return self
      */
-    public function close();
+    public function subscribe(Topic $topic);
+
+    /**
+     * Remove a topic that the connection is subscribed to.
+     *
+     * @param \App\Server\Contracts\Topic $topic to unsubscribe from.
+     *
+     * @return self
+     */
+    public function unsubscribe(Topic $topic);
 }

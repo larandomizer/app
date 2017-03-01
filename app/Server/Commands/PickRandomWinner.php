@@ -2,26 +2,24 @@
 
 namespace App\Server\Commands;
 
-use App\Server\Command;
-use App\Server\Contracts\ClientCommand;
 use App\Server\Contracts\Connection;
-use App\Server\Contracts\ServerCommand;
-use App\Server\Traits\AdminProtection;
+use App\Server\Entities\Command;
+use App\Server\Messages\AwardWinner;
+use App\Server\Messages\UpdateConnections;
+use App\Server\Messages\UpdatePrizes;
 
-class PickRandomWinner extends Command implements ClientCommand, ServerCommand
+class PickRandomWinner extends Command
 {
-    use AdminProtection;
-
     /**
-     * Handle the command.
+     * Run the command.
      */
-    public function handle()
+    public function run()
     {
-        $prize = $this->listener()
-            ->prizes()
-            ->first();
+        $prizes = $this->dispatcher()->prizes();
 
-        $winner = $this->listener()
+        $prize = $prizes->pop();
+
+        $winner = $this->dispatcher()
             ->connections()
             ->type(Connection::PLAYER)
             ->random();
@@ -29,17 +27,11 @@ class PickRandomWinner extends Command implements ClientCommand, ServerCommand
         $winner->type(Connection::WINNER);
         $winner->prize($prize);
 
-        $this->listener()
-            ->prizes()
-            ->forget($prize);
+        $everyone = $this->dispatcher()->connections();
 
-        $this->listener()
-            ->broadcast(
-                new UpdatePrizes($this->listener()->prizes()),
-                $this->listener()->connections())
-            ->broadcast(
-                new UpdateConnections($this->listener()->connections()),
-                $this->listener()->connections())
+        $this->dispatcher()
+            ->broadcast(new UpdatePrizes($prizes),$everyone)
+            ->broadcast(new UpdateConnections($everyone), $everyone)
             ->send(new AwardWinner($prize), $winner);
     }
 }

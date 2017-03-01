@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Server;
+namespace App\Server\Entities;
 
 use App\Server\Contracts\Connection;
 use App\Server\Contracts\Notification as NotificationInterface;
-use App\Server\Traits\DynamicProperties;
+use App\Server\Traits\FluentProperties;
 use Ramsey\Uuid\Uuid;
 
 class Notification implements NotificationInterface
 {
-    use DynamicProperties;
+    use FluentProperties;
 
     protected $sender;
     protected $uuid;
@@ -37,7 +37,7 @@ class Notification implements NotificationInterface
      */
     public function uuid($uuid = null)
     {
-        return $this->dynamic('uuid', $uuid);
+        return $this->property(__METHOD__, $uuid);
     }
 
     /**
@@ -52,6 +52,6 @@ class Notification implements NotificationInterface
      */
     public function sender(Connection $connection = null)
     {
-        return $this->dynamic('sender', $connection);
+        return $this->property(__METHOD__, $connection);
     }
 }

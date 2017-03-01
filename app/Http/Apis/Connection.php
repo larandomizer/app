@@ -13,7 +13,10 @@ class Connection extends Api
 
     public function notify($uuid)
     {
-        $this->queue(new NotifyConnection(compact('uuid')));
+        $receiver = $uuid;
+        $sender = request()->get('sender');
+
+        $this->queue(new NotifyConnection(compact('sender', 'receiver')));
     }
 
     public function dismissNotifications($uuid)

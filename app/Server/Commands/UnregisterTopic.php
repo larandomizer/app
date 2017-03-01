@@ -3,9 +3,8 @@
 namespace App\Server\Commands;
 
 use App\Server\Entities\Command;
-use App\Server\Messages\UpdateNotifications;
 
-class DismissNotifications extends Command
+class UnregisterTopic extends Command
 {
     /**
      * Save the command arguments for later when the command is run.
@@ -19,18 +18,11 @@ class DismissNotifications extends Command
 
     /**
      * Run the command.
-     *
-     * @return mixed
      */
     public function run()
     {
-        $connection = $this->dispatcher()
-            ->connections()
-            ->uuid($this->uuid);
+        $topic = $this->dispatcher()->topics()->uuid($this->uuid);
 
-        $connection->notifications([]);
-
-        return $this->dispatcher()
-            ->send(new UpdateNotifications($connection->notifications()), $connection);
+        $this->dispatcher()->unregister($topic);
     }
 }

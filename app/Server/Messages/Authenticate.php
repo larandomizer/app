@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Server\Commands;
+namespace App\Server\Messages;
 
-use App\Server\Command;
-use App\Server\Contracts\ClientCommand;
+use App\Server\Contracts\ClientMessage;
+use App\Server\Entities\Message;
 use App\Server\Traits\NoProtection;
 
-class Authenticate extends Command implements ClientCommand
+class Authenticate extends Message implements ClientMessage
 {
     use NoProtection;
 
     /**
-     * Save the command arguments for later when the command is handled.
+     * Save the message arguments for later when the message is handled.
      *
      * @param array $arguments
      */
@@ -21,19 +21,18 @@ class Authenticate extends Command implements ClientCommand
     }
 
     /**
-     * Handle the command.
+     * Handle the message.
      */
     public function handle()
     {
-        if( $this->listener()->password() !== $this->password ) {
-
-           return $this->listener()
+        if ($this->dispatcher()->password() !== $this->password) {
+            return $this->dispatcher()
                 ->send(new PromptForAuthentication($this), $this->client());
         }
 
         $this->client()->admin(true);
 
-        return $this->listener()
+        return $this->dispatcher()
             ->send(new Authenticated($this->client()), $this->client());
     }
 }

@@ -33,7 +33,7 @@ trait RatchetAdapter
      */
     public function onClose(ConnectionInterface $conn)
     {
-        $this->close($this->connections()->socket($conn));
+        $this->close($this->getConnectionFromSocket($conn));
     }
 
     /**
@@ -49,7 +49,7 @@ trait RatchetAdapter
      */
     public function onError(ConnectionInterface $conn, \Exception $e)
     {
-        $this->error($this->connections()->socket($conn), $e);
+        $this->error($this->getConnectionFromSocket($conn), $e);
     }
 
     /**
@@ -64,6 +64,18 @@ trait RatchetAdapter
      */
     public function onMessage(ConnectionInterface $from, $msg)
     {
-        $this->message($this->connections()->socket($from), $msg);
+        $this->message($this->getConnectionFromSocket($from), $msg);
+    }
+
+    /**
+     * Get the stored connection based on the provided socket.
+     *
+     * @param \Ratchet\ConnectionInterface $conn
+     *
+     * @return \App\Server\Contracts\Connection
+     */
+    protected function getConnectionForSocket(ConnectionInterface $conn)
+    {
+        return $this->manager()->connections()->socket($conn);
     }
 }

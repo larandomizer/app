@@ -2,9 +2,10 @@
 
 namespace App\Server;
 
-use App\Server\Contracts\Listener as ListenerInterface;
+use App\Server\Contracts\Broker as BrokerInterface;
 use App\Server\Contracts\Server as ServerInterface;
-use App\Server\Traits\DynamicProperties;
+use App\Server\Entities\Connections;
+use App\Server\Traits\FluentProperties;
 use Illuminate\Contracts\Queue\Queue;
 use Illuminate\Support\Facades\Queue as QueueManager;
 use Ratchet\Http\HttpServer;
@@ -14,17 +15,16 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Server implements ServerInterface
 {
-    use DynamicProperties;
+    use FluentProperties;
 
     protected $address = '0.0.0.0';
+    protected $broker;
     protected $connector;
     protected $http;
-    protected $listener;
-    protected $max_connections;
     protected $output;
     protected $port = 8080;
     protected $queue = 'default';
-    protected $server;
+    protected $socket;
     protected $websocket;
 
     /**
@@ -35,11 +35,11 @@ class Server implements ServerInterface
     public static function make()
     {
         $server = app(static::class)
-            ->listener(new Listener(new Connections()));
+            ->broker(new Broker(new Manager(new Connections())));
 
-        return $server->websocket(new WsServer($server->listener()))
+        return $server->websocket(new WsServer($server->broker()))
             ->http(new HttpServer($server->websocket()))
-            ->server(IoServer::factory($server->http(), $server->port(), $server->address()));
+            ->socket(IoServer::factory($server->http(), $server->port(), $server->address()));
     }
 
     /**
@@ -71,8 +71,7 @@ class Server implements ServerInterface
      */
     public function start()
     {
-        $this->listener()->start();
-        $this->server()->run();
+        $this->broker()->manager()->start();
     }
 
     /**
@@ -80,8 +79,7 @@ class Server implements ServerInterface
      */
     public function stop()
     {
-        $this->listener()->stop();
-        $this->server()->loop->stop();
+        $this->broker()->manager()->stop();
     }
 
     /**
@@ -96,7 +94,7 @@ class Server implements ServerInterface
      */
     public function password($password = null)
     {
-        return $this->dynamic('password', $password);
+        return $this->broker()->manager()->password($password);
     }
 
     /**
@@ -111,7 +109,7 @@ class Server implements ServerInterface
      */
     public function address($ip4 = null)
     {
-        return $this->dynamic('address', $ip4);
+        return $this->property(__METHOD__, $ip4);
     }
 
     /**
@@ -126,7 +124,7 @@ class Server implements ServerInterface
      */
     public function port($number = null)
     {
-        return $this->dynamic('port', $number);
+        return $this->property(__METHOD__, $number);
     }
 
     /**
@@ -156,6 +154,21 @@ class Server implements ServerInterface
     }
 
     /**
+     * Get or set the queue connector the server uses.
+     *
+     * @example connector() ==> \Illuminate\Contracts\Queue\Queue
+     *          connector($instance) ==> self
+     *
+     * @param \Illuminate\Contracts\Queue\Queue $instance
+     *
+     * @return \Illuminate\Contracts\Queue\Queue|self
+     */
+    public function connector(Queue $instance = null)
+    {
+        return $this->broker()->manager()->connector($instance);
+    }
+
+    /**
      * Get or set the queue the server processes.
      *
      * @example queue() ==> 'server'
@@ -167,7 +180,7 @@ class Server implements ServerInterface
      */
     public function queue($name = null)
     {
-        return $this->dynamic('queue', $name);
+        return $this->broker()->manager()->queue($name);
     }
 
     /**
@@ -192,9 +205,6 @@ class Server implements ServerInterface
         $this->connector($connection);
         $this->queue($name);
 
-        // @todo the connection and queue need to be passed to the listener
-        // @todo the loop needs to have a queue worker added to it
-
         return $this;
     }
 
@@ -210,51 +220,44 @@ class Server implements ServerInterface
      */
     public function maxConnections($number = null)
     {
-        if (is_null($number)) {
-            return $this->dynamic('max_connections', $number);
-        }
-
-        $this->dynamic('max_connections', $number);
-        // @todo max connections needs to be passed to listener
-
-        return $this;
+        return $this->broker()->maxConnections($number);
     }
 
     /**
-     * Get or set the queue connector the server uses.
+     * Get or set the logger interface the server pipes output to.
      *
-     * @example connector() ==> \Illuminate\Contracts\Queue\Queue
-     *          connector($connector) ==> self
+     * @example logger() ==> \Symfony\Component\Console\Output\OutputInterface
+     *          logger($interface) ==> self
      *
-     * @param \Illuminate\Contracts\Queue\Queue $instance
+     * @param \Symfony\Component\Console\Output\OutputInterface $interface
      *
-     * @return \Illuminate\Contracts\Queue\Queue|self
+     * @return \Symfony\Component\Console\Output\OutputInterface|self
      */
-    public function connector(Queue $instance = null)
+    public function logger(OutputInterface $interface = null)
     {
-        return $this->dynamic('connector', $instance);
+        return $this->broker()->logger($interface);
     }
 
     /**
-     * Get or set the event listener the server uses.
+     * Get or set the event broker the server uses.
      *
-     * @example listener() ==> \App\Server\Contracts\Listener
-     *          listener($listener) ==> self
+     * @example broker() ==> \App\Server\Contracts\Broker
+     *          broker($instance) ==> self
      *
-     * @param \App\Server\Contracts\Listener $instance
+     * @param \App\Server\Contracts\Broker $instance
      *
-     * @return \App\Server\Contracts\Listener|self
+     * @return \App\Server\Contracts\Broker|self
      */
-    public function listener(ListenerInterface $instance = null)
+    public function broker(BrokerInterface $instance = null)
     {
-        return $this->dynamic('listener', $instance);
+        return $this->property(__METHOD__, $instance);
     }
 
     /**
      * Get or set the WebSocket instance the server uses.
      *
      * @example websocket() ==> \Ratchet\WebSocket\WsServer
-     *          websocket($websocket) ==> self
+     *          websocket($instance) ==> self
      *
      * @param \Ratchet\WebSocket\WsServer $instance
      *
@@ -262,14 +265,14 @@ class Server implements ServerInterface
      */
     public function websocket(WsServer $instance = null)
     {
-        return $this->dynamic('websocket', $instance);
+        return $this->property(__METHOD__, $instance);
     }
 
     /**
      * Get or set the HTTP instance the server uses.
      *
      * @example http() ==> \Ratchet\Http\HttpServer
-     *          http($http) ==> self
+     *          http($instance) ==> self
      *
      * @param \Ratchet\Http\HttpServer $instance
      *
@@ -277,44 +280,25 @@ class Server implements ServerInterface
      */
     public function http(HttpServer $instance = null)
     {
-        return $this->dynamic('http', $instance);
+        return $this->property(__METHOD__, $instance);
     }
 
     /**
      * Get or set the I/O instance the server uses.
      *
-     * @example server() ==> \Ratchet\Server\IoServer
-     *          server($server) ==> self
+     * @example socket() ==> \Ratchet\Server\IoServer
+     *          socket($instance) ==> self
      *
      * @param \Ratchet\Server\IoServer $instance
      *
      * @return \Ratchet\Server\IoServer|self
      */
-    public function server(IoServer $instance = null)
+    public function socket(IoServer $instance = null)
     {
         if ( ! is_null($instance)) {
-            $this->listener()->loop($instance->loop);
+            $this->broker()->loop($instance->loop);
         }
 
-        return $this->dynamic('server', $instance);
-    }
-
-    /**
-     * Get or set the output interface the server pipes output to.
-     *
-     * @example output() ==> \Symfony\Component\Console\Output\OutputInterface
-     *          output($output) ==> self
-     *
-     * @param \Symfony\Component\Console\Output\OutputInterface $interface
-     *
-     * @return \Symfony\Component\Console\Output\OutputInterface|self
-     */
-    public function output(OutputInterface $interface = null)
-    {
-        if ( ! is_null($interface)) {
-            $this->listener()->output($interface);
-        }
-
-        return $this->dynamic('output', $interface);
+        return $this->property(__METHOD__, $instance);
     }
 }

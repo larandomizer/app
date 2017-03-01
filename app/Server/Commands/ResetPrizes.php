@@ -2,26 +2,22 @@
 
 namespace App\Server\Commands;
 
-use App\Server\Command;
-use App\Server\Contracts\ClientCommand;
-use App\Server\Contracts\ServerCommand;
-use App\Server\Traits\AdminProtection;
+use App\Server\Entities\Command;
+use App\Server\Messages\UpdatePrizes;
 
-class ResetPrizes extends Command implements ClientCommand, ServerCommand
+class ResetPrizes extends Command
 {
-    use AdminProtection;
-
     /**
-     * Handle the command.
+     * Run the command.
      */
-    public function handle()
+    public function run()
     {
-        $this->listener()->prizes([]);
+        $this->dispatcher()->prizes([]);
 
-        return $this->listener()
-            ->broadcast(
-                new UpdatePrizes($this->listener()->prizes()),
-                $this->listener()->connections()
-            );
+        $prizes = $this->dispatcher()->prizes();
+        $everyone = $this->dispatcher()->connections();
+
+        return $this->dispatcher()
+            ->broadcast(new UpdatePrizes($prizes), $everyone);
     }
 }

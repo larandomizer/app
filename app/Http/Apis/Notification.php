@@ -11,6 +11,6 @@ class Notification extends Api
 
     public function send()
     {
-        $this->queue(new NotifyConnection(request()->only('uuid')));
+        $this->queue(new NotifyConnection(request()->only('receiver', 'sender')));
     }
 }

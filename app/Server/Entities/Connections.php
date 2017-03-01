@@ -1,12 +1,15 @@
 <?php
 
-namespace App\Server;
+namespace App\Server\Entities;
 
+use App\Server\Traits\UUIDFilter;
 use Illuminate\Support\Collection;
 use Ratchet\ConnectionInterface;
 
 class Connections extends Collection
 {
+    use UUIDFilter;
+
     /**
      * Filter connections to those with the registered type.
      *
@@ -14,7 +17,7 @@ class Connections extends Collection
      *
      * @return self
      */
-    public function type($types = null)
+    public function types($types = null)
     {
         if (is_null($types) || empty($types)) {
             return $this;
@@ -36,7 +39,7 @@ class Connections extends Collection
      *
      * @return self
      */
-    public function topic($topics = null)
+    public function topics($topics = null)
     {
         if (is_null($topics) || empty($topics)) {
             return $this;
@@ -62,20 +65,6 @@ class Connections extends Collection
     {
         return $this->first(function ($connection) use ($socket) {
             return $connection->socket() === $socket;
-        });
-    }
-
-    /**
-     * Get the first connection that matches the UUID.
-     *
-     * @param string $uuid
-     *
-     * @return \App\Server\Contracts\Connection|null
-     */
-    public function uuid($uuid)
-    {
-        return $this->first(function ($connection) use ($uuid) {
-            return $connection->uuid() === $uuid;
         });
     }
 }

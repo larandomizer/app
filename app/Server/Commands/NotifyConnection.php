@@ -2,46 +2,44 @@
 
 namespace App\Server\Commands;
 
-use App\Server\Command;
-use App\Server\Contracts\ClientCommand;
-use App\Server\Contracts\ServerCommand;
-use App\Server\Notification;
-use App\Server\Traits\NoProtection;
+use App\Server\Entities\Command;
+use App\Server\Entities\Notification;
+use App\Server\Messages\UpdateNotifications;
 
-class NotifyConnection extends Command implements ClientCommand, ServerCommand
+class NotifyConnection extends Command
 {
-    use NoProtection;
-
     /**
-     * Save the command arguments for later when the command is handled.
+     * Save the command arguments for later when the command is run.
      *
      * @param array $arguments
      */
     public function __construct(array $arguments = [])
     {
-        $this->uuid = array_get($arguments, 'uuid');
+        $this->receiver = array_get($arguments, 'receiver');
+        $this->sender = array_get($arguments, 'sender');
     }
 
     /**
-     * Handle the command.
+     * Run the command.
      *
      * @return mixed
      */
-    public function handle()
+    public function run()
     {
-        $notification = new Notification($this->client()->uuid());
-
-        $connection = $this->listener()
+        $sender = $this->dispatcher()
             ->connections()
-            ->uuid($uuid);
+            ->uuid($this->sender);
 
-        $connection->notifications()
+        $notification = new Notification($sender);
+
+        $receiver = $this->dispatcher()
+            ->connections()
+            ->uuid($this->receiver);
+
+        $receiver->notifications()
             ->put($notification->sender(), $notification);
 
-        return $this->listener()
-            ->send(
-                new UpdateNotifications($connection->notifications()),
-                $connection
-            );
+        return $this->dispatcher()
+            ->send(new UpdateNotifications($receiver->notifications()), $receiver);
     }
 }

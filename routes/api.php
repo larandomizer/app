@@ -29,4 +29,9 @@ $router->group(['prefix' => 'prize'], function($router) {
     $router->get('/', 'Prize@giveaway');
 });
 
+$router->group(['prefix' => 'topic'], function($router) {
+    $router->delete('{uuid}', 'Topic@destroy');
+    $router->post('/', 'Topic@store');
+});
+
 $router->post('server', 'Server@restart');

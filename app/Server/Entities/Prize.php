@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Server;
+namespace App\Server\Entities;
 
 use App\Server\Contracts\Prize as PrizeInterface;
-use App\Server\Traits\DynamicProperties;
+use App\Server\Traits\FluentProperties;
 use Ramsey\Uuid\Uuid;
 
 class Prize implements PrizeInterface
 {
-    use DynamicProperties;
+    use FluentProperties;
 
     protected $name;
     protected $sponsor;
@@ -28,7 +28,7 @@ class Prize implements PrizeInterface
     }
 
     /**
-     * Get or set the UUID of the connection.
+     * Get or set the UUID of the prize.
      *
      * @example uuid() ==> string
      *          uuid($uuid) ==> self
@@ -39,7 +39,7 @@ class Prize implements PrizeInterface
      */
     public function uuid($uuid = null)
     {
-        return $this->dynamic('uuid', $uuid);
+        return $this->property(__METHOD__, $uuid);
     }
 
     /**
@@ -54,7 +54,7 @@ class Prize implements PrizeInterface
      */
     public function name($name = null)
     {
-        return $this->dynamic('name', $name);
+        return $this->property(__METHOD__, $name);
     }
 
     /**
@@ -69,6 +69,6 @@ class Prize implements PrizeInterface
      */
     public function sponsor($sponsor = null)
     {
-        return $this->dynamic('sponsor', $sponsor);
+        return $this->property(__METHOD__, $sponsor);
     }
 }

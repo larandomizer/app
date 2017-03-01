@@ -17,6 +17,6 @@ trait Client
      */
     public function client(Connection $connection = null)
     {
-        return $this->dynamic('client', $connection);
+        return $this->property(__METHOD__, $connection);
     }
 }

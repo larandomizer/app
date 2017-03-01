@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Server\Commands;
+namespace App\Server\Messages;
 
-use App\Server\Command;
 use App\Server\Contracts\Prize;
-use App\Server\Contracts\ServerCommand;
+use App\Server\Contracts\ServerMessage;
+use App\Server\Entities\Message;
 
-class AwardWinner extends Command implements ServerCommand
+class AwardWinner extends Message implements ServerMessage
 {
     /**
      * Tell the winner what they won.

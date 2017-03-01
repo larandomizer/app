@@ -7,18 +7,34 @@ use Illuminate\Contracts\Support\Jsonable;
 interface Command extends Jsonable
 {
     /**
-     * Get or set the connection listener.
+     * Save the command arguments for later when the command is run.
      *
-     * @param \App\Server\Contracts\Listener $interface for the server
-     *
-     * @return \App\Server\Contracts\Listener|self
+     * @param array $arguments
      */
-    public function listener(Listener $interface = null);
+    public function __construct(array $arguments = []);
 
     /**
-     * Handle the command.
+     * Get or set the command dispatcher.
+     *
+     * @param \App\Server\Contracts\Manager $instance for the server
+     *
+     * @return \App\Server\Contracts\Manager|self
+     */
+    public function dispatcher(Manager $instance = null);
+
+    /**
+     * Get or set the delay in milliseconds for the command to be executed.
+     *
+     * @param int $delay in ms
+     *
+     * @return int|self
+     */
+    public function delay($delay = null);
+
+    /**
+     * Run the command.
      *
      * @return mixed
      */
-    public function handle();
+    public function run();
 }

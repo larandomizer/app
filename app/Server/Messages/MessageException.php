@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Server\Commands;
+namespace App\Server\Messages;
 
-use App\Server\Command;
-use App\Server\Contracts\ServerCommand;
+use App\Server\Contracts\ServerMessage;
+use App\Server\Entities\Message;
 use Exception;
 
-class CommandException extends Command implements ServerCommand
+class MessageException extends Message implements ServerMessage
 {
     /**
-     * Wrap an exception as a command.
+     * Wrap an exception as a message.
      *
      * @param \Exception $exception
      */

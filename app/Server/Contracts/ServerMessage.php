@@ -2,6 +2,6 @@
 
 namespace App\Server\Contracts;
 
-interface ServerCommand extends Command
+interface ServerMessage extends Message
 {
 }

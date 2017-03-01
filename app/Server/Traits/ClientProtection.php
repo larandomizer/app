@@ -13,7 +13,7 @@ trait ClientProtection
      */
     public function authorize()
     {
-        return $this->client()->isAdmin()
+        return $this->client()->admin()
             || $this->client()->uuid() === $this->uuid;
     }
 }

@@ -13,6 +13,6 @@ trait AdminProtection
      */
     public function authorize()
     {
-        return $this->client()->isAdmin();
+        return $this->client()->admin();
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Server\Contracts;
 
-interface ClientCommand extends Command
+interface ClientMessage extends Message
 {
     /**
      * Authorize the client connection.

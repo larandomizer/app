@@ -2,20 +2,20 @@
 
 namespace App\Server\Traits;
 
-trait DynamicProperties
+trait FluentProperties
 {
     /**
-     * Dynamically get or set the property's value.
+     * Dynamically get or set the property's value using fluency.
      *
-     * @example dynamic('foo') ==> true
-     *          dynamic('foo', true) ==> self
+     * @example property('foo') ==> true
+     *          property('foo', true) ==> self
      *
      * @param string $property
      * @param mixed  $value
      *
      * @return mixed|self
      */
-    protected function dynamic($property, $value = null)
+    protected function property($property, $value = null)
     {
         if (is_null($value)) {
             return $this->$property;

@@ -2,16 +2,12 @@
 
 namespace App\Server\Commands;
 
-use App\Server\Command;
-use App\Server\Contracts\ClientCommand;
-use App\Server\Contracts\ServerCommand;
+use App\Server\Entities\Command;
 
-class CloseConnections extends Command implements ClientCommand, ServerCommand
+class CloseConnections extends Command
 {
-    use ClientProtection;
-
     /**
-     * Save the command arguments for later when the command is handled.
+     * Save the command arguments for later when the command is run.
      *
      * @param array $arguments
      */
@@ -22,13 +18,13 @@ class CloseConnections extends Command implements ClientCommand, ServerCommand
     }
 
     /**
-     * Handle the command.
+     * Run the command.
      *
      * @return mixed
      */
-    public function handle()
+    public function run()
     {
-        if ($this->uuid && $this->canDisconnectUUID()) {
+        if ($this->uuid) {
             return $this->disconnectUUID($this->uuid);
         }
 
@@ -40,16 +36,6 @@ class CloseConnections extends Command implements ClientCommand, ServerCommand
     }
 
     /**
-     * Check if the command caller can disconnect a UUID.
-     *
-     * @return bool
-     */
-    protected function canDisconnectUUID()
-    {
-        return ! $this->client() || $this->authorize();
-    }
-
-    /**
      * Disconnect the connection having the UUID.
      *
      * @param string $uuid of connection
@@ -58,7 +44,7 @@ class CloseConnections extends Command implements ClientCommand, ServerCommand
      */
     protected function disconnectUUID($uuid)
     {
-        return $this->listener()
+        return $this->dispatcher()
             ->connections()
             ->uuid($uuid)
             ->close();
@@ -73,9 +59,9 @@ class CloseConnections extends Command implements ClientCommand, ServerCommand
      */
     protected function disconnectByType($type)
     {
-        return $this->listener()
+        return $this->dispatcher()
             ->connections()
-            ->type($type)
+            ->types($type)
             ->each(function ($connection) {
                 $connection->close();
             });
@@ -88,7 +74,7 @@ class CloseConnections extends Command implements ClientCommand, ServerCommand
      */
     protected function disconnectAll()
     {
-        return $this->listener()
+        return $this->dispatcher()
             ->connections()
             ->each(function ($connection) {
                 $connection->close();

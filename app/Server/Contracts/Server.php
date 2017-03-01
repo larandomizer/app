@@ -11,6 +11,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 interface Server
 {
     /**
+     * Make a new instance of the server.
+     *
+     * @return self
+     */
+    public static function make();
+
+    /**
      * Set the bindings for the server.
      *
      * @example bind('0.0.0.0')
@@ -86,6 +93,18 @@ interface Server
     public function bindings($address = null, $port = null);
 
     /**
+     * Get or set the queue connector the server uses.
+     *
+     * @example connector() ==> \Illuminate\Contracts\Queue\Queue
+     *          connector($connector) ==> self
+     *
+     * @param \Illuminate\Contracts\Queue\Queue $instance
+     *
+     * @return \Illuminate\Contracts\Queue\Queue|self
+     */
+    public function connector(Queue $instance = null);
+
+    /**
      * Get or set the queue the server processes.
      *
      * @example queue() ==> 'server'
@@ -125,28 +144,28 @@ interface Server
     public function maxConnections($number = null);
 
     /**
-     * Get or set the queue connector the server uses.
+     * Get or set the output interface the server pipes output to.
      *
-     * @example connector() ==> \Illuminate\Contracts\Queue\Queue
-     *          connector($connector) ==> self
+     * @example logger() ==> \Symfony\Component\Console\Output\OutputInterface
+     *          logger($instance) ==> self
      *
-     * @param \Illuminate\Contracts\Queue\Queue $instance
+     * @param \Symfony\Component\Console\Output\OutputInterface $interface
      *
-     * @return \Illuminate\Contracts\Queue\Queue|self
+     * @return \Symfony\Component\Console\Output\OutputInterface|self
      */
-    public function connector(Queue $instance = null);
+    public function logger(OutputInterface $instance = null);
 
     /**
-     * Get or set the event listener the server uses.
+     * Get or set the message broker the server uses.
      *
-     * @example listener() ==> \App\Server\Contracts\Listener
-     *          listener($listener) ==> self
+     * @example broker() ==> \App\Server\Contracts\Broker
+     *          broker($instance) ==> self
      *
-     * @param \App\Server\Contracts\Listener $instance
+     * @param \App\Server\Contracts\Broker $instance
      *
-     * @return \App\Server\Contracts\Listener|self
+     * @return \App\Server\Contracts\Broker|self
      */
-    public function listener(Listener $instance = null);
+    public function broker(Broker $instance = null);
 
     /**
      * Get or set the WebSocket instance the server uses.
@@ -175,24 +194,12 @@ interface Server
     /**
      * Get or set the I/O instance the server uses.
      *
-     * @example server() ==> \Ratchet\Server\IoServer
-     *          server($server) ==> self
+     * @example socket() ==> \Ratchet\Server\IoServer
+     *          socket($instance) ==> self
      *
      * @param \Ratchet\Server\IoServer $instance
      *
      * @return \Ratchet\Server\IoServer|self
      */
-    public function server(IoServer $instance = null);
-
-    /**
-     * Get or set the output interface the server pipes output to.
-     *
-     * @example output() ==> \Symfony\Component\Console\Output\OutputInterface
-     *          output($output) ==> self
-     *
-     * @param \Symfony\Component\Console\Output\OutputInterface $interface
-     *
-     * @return \Symfony\Component\Console\Output\OutputInterface|self
-     */
-    public function output(OutputInterface $interface = null);
+    public function socket(IoServer $instance = null);
 }
