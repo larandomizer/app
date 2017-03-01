@@ -84,9 +84,9 @@ class Prize implements PrizeInterface, Arrayable, Jsonable, JsonSerializable
      * @example winner() ==> \App\Server\Contract\Connection
      *          winner($winner) ==> self
      *
-     * @param \App\Server\Contract\Connection $winner
+     * @param \App\Server\Contracts\Connection $winner
      *
-     * @return \App\Server\Contract\Connection|self
+     * @return \App\Server\Contracts\Connection|self
      */
     public function winner(Connection $winner = null)
     {

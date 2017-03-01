@@ -1,8 +1,6 @@
 <?php
 
-namespace App\Server\Entities;
-
-use App\Server\Contracts\Connection;
+namespace App\Server\Contracts;
 
 interface Prize
 {
