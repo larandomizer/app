@@ -1,16 +1,18 @@
 <template>
-    <table class="table table-condensed">
-        <thead>
-            <tr>
-                <th :width="col.width" v-text="col.name" v-for="col in columns"></th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr v-for="row in rows" @mouseenter="rowOn(row)" @mouseleave="rowOff(row)">
-                <grid-col v-for="col in columns" :id="col.key" :record="row" :connection="isActive(row)"></grid-col>
-            </tr>
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table table-condensed">
+            <thead>
+                <tr>
+                    <th :width="col.width" v-text="col.name" v-for="col in columns"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="row in rows" @mouseenter="rowOn(row)" @mouseleave="rowOff(row)">
+                    <grid-col v-for="col in columns" :id="col.key" :record="row" :active="isActive(row)"></grid-col>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </template>
 
 <script>

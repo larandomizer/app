@@ -22,7 +22,8 @@
         methods: {
             toggle(e) {
                 e.preventDefault();
-                Event.fire('connection.toggle', this.connection);
+                let event = this.connected ? 'disconnect' : 'reconnect';
+                Event.fire('connection.' + event, this.connection);
             }
         }
     }

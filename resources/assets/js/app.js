@@ -48,15 +48,11 @@ const app = new Vue({
         Event.listen('CurrentUptime', message => {
             this.uptime = message.elapsed;
         });
-        Event.listen('connection.toggle', connection => {
-            if( this.connected ) {
-                this.disconnect(connection.uuid);
-            } else {
-                this.reconnect();
-            }
-        });
         Event.listen('connection.disconnect', connection => {
             this.disconnect(connection.uuid);
+        });
+        Event.listen('connection.reconnect', connection => {
+            this.reconnect();
         });
         Event.listen('connection.disconnect.players', () => {
             this.disconnectPlayers();
@@ -195,7 +191,10 @@ const app = new Vue({
 
         // Notification Control Methods
         notifyConnection(uuid) {
-            console.log('Send notification to ' + uuid);
+            Server.send('NotifyConnection', {
+                sender: this.connection.uuid,
+                receiver: uuid
+            });
         },
         dismissNotifications() {
             console.log('Dismissing all notifications');

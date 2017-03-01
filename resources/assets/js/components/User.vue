@@ -10,12 +10,33 @@
     export default {
         computed: {
             name() {
-                return this.connection && this.connection.name !== undefined ? this.connection.name : 'Anonymous';
+                let name = 'Anonymous';
+
+                if (this.connection.hasOwnProperty('name')) {
+                    this.formatName(this.connection.name);
+                }
+
+                return name;
             },
             className() {
                 return this.connected ? 'is-connected' : 'is-disconnected';
             }
         },
-        props: ['connection', 'connected']
+        props: ['connection', 'connected'],
+        methods: {
+            formatName(name) {
+                let names = [];
+
+                if (name !== undefined) {
+                    names = name.split(' ');
+                    name = names[0];
+                    if (names[1]) {
+                        name += ' ' + names[1][1].toUpperCase() + '.';
+                    }
+                }
+
+                return name;
+            }
+        }
     }
 </script>
