@@ -2,17 +2,23 @@
 
 namespace App\Server\Entities;
 
+use App\Server\Contracts\Connection;
 use App\Server\Contracts\Prize as PrizeInterface;
 use App\Server\Traits\FluentProperties;
+use App\Server\Traits\JsonHelpers;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Contracts\Support\Jsonable;
+use JsonSerializable;
 use Ramsey\Uuid\Uuid;
 
-class Prize implements PrizeInterface
+class Prize implements PrizeInterface, Arrayable, Jsonable, JsonSerializable
 {
-    use FluentProperties;
+    use FluentProperties, JsonHelpers;
 
     protected $name;
     protected $sponsor;
     protected $uuid;
+    protected $winner;
 
     /**
      * Instantiate the prize with the name and sponsor.
@@ -70,5 +76,35 @@ class Prize implements PrizeInterface
     public function sponsor($sponsor = null)
     {
         return $this->property(__METHOD__, $sponsor);
+    }
+
+    /**
+     * Get or set the winner of the prize.
+     *
+     * @example winner() ==> \App\Server\Contract\Connection
+     *          winner($winner) ==> self
+     *
+     * @param \App\Server\Contract\Connection $winner
+     *
+     * @return \App\Server\Contract\Connection|self
+     */
+    public function winner(Connection $winner = null)
+    {
+        return $this->property(__METHOD__, $winner);
+    }
+
+    /**
+     * Get the instance as an array.
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        return array_filter([
+            'uuid'    => $this->uuid,
+            'name'    => $this->name,
+            'sponsor' => $this->sponsor,
+            'winner'  => $this->winner ? $this->winner->toArray() : null,
+        ]);
     }
 }

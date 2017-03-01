@@ -24,4 +24,13 @@ abstract class Message extends Fluent implements MessageInterface
     {
         return $this->property(__METHOD__, $instance);
     }
+
+    /**
+     * Handle the message.
+     *
+     * @return mixed
+     */
+    public function handle()
+    {
+    }
 }

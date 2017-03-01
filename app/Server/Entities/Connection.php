@@ -6,12 +6,16 @@ use App\Server\Contracts\Connection as ConnectionInterface;
 use App\Server\Contracts\Prize;
 use App\Server\Contracts\Topic;
 use App\Server\Traits\FluentProperties;
+use App\Server\Traits\JsonHelpers;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Contracts\Support\Jsonable;
+use JsonSerializable;
 use Ramsey\Uuid\Uuid;
 use Ratchet\ConnectionInterface as SocketInterface;
 
-class Connection implements ConnectionInterface
+class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerializable
 {
-    use FluentProperties;
+    use FluentProperties, JsonHelpers;
 
     protected $admin;
     protected $email;
@@ -217,5 +221,24 @@ class Connection implements ConnectionInterface
     public function notifications(Notifications $notifications = null)
     {
         return $this->property(__METHOD__, $notifications);
+    }
+
+    /**
+     * Get the instance as an array.
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        return array_filter([
+            'uuid'          => $this->uuid,
+            'resource_id'   => $this->socket->resourceId,
+            'type'          => $this->type,
+            'admin'         => $this->admin,
+            'name'          => $this->name,
+            'notifications' => $this->notifications->toArray(),
+            'subscriptions' => $this->subscriptions->toArray(),
+            'prize'         => $this->prize ? $this->prize->toArray() : null,
+        ]);
     }
 }

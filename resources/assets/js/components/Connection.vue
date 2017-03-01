@@ -9,20 +9,20 @@
     export default {
         computed: {
             className() {
-                return this.status ? 'is-connected' : 'is-disconnected';
+                return this.connected ? 'is-connected' : 'is-disconnected';
             },
             icon() {
-                return this.status ? 'mdi-power' : 'mdi-refresh';
+                return this.connected ? 'mdi-power' : 'mdi-refresh';
             },
             label() {
-                return this.status ? 'Disconnect' : 'Reconnect';
+                return this.connected ? 'Disconnect' : 'Reconnect';
             }
         },
-        props: ['status'],
+        props: ['connection', 'connected'],
         methods: {
             toggle(e) {
                 e.preventDefault();
-                Event.fire('connection.toggle');
+                Event.fire('connection.toggle', this.connection);
             }
         }
     }

@@ -29,7 +29,7 @@ interface Command extends Jsonable
      *
      * @return int|self
      */
-    public function delay($delay = null);
+    public function delayed($delay = null);
 
     /**
      * Run the command.

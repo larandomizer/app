@@ -2,7 +2,7 @@
 
 namespace App\Server\Traits;
 
-use App\Server\Connection;
+use App\Server\Entities\Connection;
 use Ratchet\ConnectionInterface;
 
 trait RatchetAdapter
@@ -33,7 +33,7 @@ trait RatchetAdapter
      */
     public function onClose(ConnectionInterface $conn)
     {
-        $this->close($this->getConnectionFromSocket($conn));
+        $this->close($this->getConnectionForSocket($conn));
     }
 
     /**
@@ -49,7 +49,7 @@ trait RatchetAdapter
      */
     public function onError(ConnectionInterface $conn, \Exception $e)
     {
-        $this->error($this->getConnectionFromSocket($conn), $e);
+        $this->error($this->getConnectionForSocket($conn), $e);
     }
 
     /**
@@ -64,7 +64,7 @@ trait RatchetAdapter
      */
     public function onMessage(ConnectionInterface $from, $msg)
     {
-        $this->message($this->getConnectionFromSocket($from), $msg);
+        $this->message($this->getConnectionForSocket($from), $msg);
     }
 
     /**

@@ -6,14 +6,14 @@
  */
 
 require('./bootstrap');
+window.Event = require('./lib/Event');
+window.Server = require('./lib/Server')(window.Event, document.location.host, document.location.port, '/socket/', document.location.protocol === 'https:');
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
-
-window.Event = require('./lib/Event');
 
 Vue.component('stat-dropdown-item', require('./components/StatDropdownItem.vue'));
 Vue.component('stat-dropdown', require('./components/StatDropdown.vue'));
@@ -28,57 +28,105 @@ const app = new Vue({
     el: '#app',
 
     created() {
-        Event.listen("connection.toggle", () => {
-            this.currentConnection = !this.currentConnection;
+        Event.listen('ConnectionEstablished', message => {
+            message.connection.timestamp = message.timestamp;
+            this.connected = true;
+            this.connection = message.connection;
         });
-        Event.listen("connection.players.disconnect", () => {
+        Event.listen('UpdateConnections', message => {
+            this.connections = _.values(message.connections);
+        });
+        Event.listen('UpdatePrizes', message => {
+            this.prizes = _.values(message.prizes);
+        });
+        Event.listen('UpdateNotifications', message => {
+            this.notifications = _.values(message.notifications);
+        });
+        Event.listen('UpdateTopics', message => {
+            this.topics = _.values(message.topics);
+        });
+        Event.listen('CurrentUptime', message => {
+            this.uptime = message.elapsed;
+        });
+        Event.listen('connection.toggle', connection => {
+            if( this.connected ) {
+                this.disconnect(connection.uuid);
+            } else {
+                this.reconnect();
+            }
+        });
+        Event.listen('connection.disconnect', connection => {
+            this.disconnect(connection.uuid);
+        });
+        Event.listen('connection.disconnect.players', () => {
             this.disconnectPlayers();
         });
-        Event.listen("connection.spectators.disconnect", () => {
+        Event.listen('connection.disconnect.spectators', () => {
             this.disconnectSpectators();
         });
-        Event.listen("connection.all.disconnect", () => {
-            this.disconnect();
+        Event.listen('connection.disconnect.all', () => {
+            this.disconnectAll();
         });
-        Event.listen('connection.ping', connection => {
-            console.log('Ping: ', connection);
+        Event.listen('notification.dismiss.all', () => {
+            this.dismissNotifications();
+        });
+        Event.listen('notification.send', connection => {
+            this.notifyConnection(connection.uuid);
+        });
+        Event.listen('server.restart', () => {
+            this.restartServer();
+        });
+        Event.listen('prizes.add', () => {
+            this.addPrize();
+        });
+        Event.listen('prizes.pick_winner', () => {
+            this.pickRandomWinner();
+        });
+        Event.listen('prizes.reset', () => {
+            this.resetPrizes();
         });
     },
 
     computed: {
-        prizesStatus() {
-            return this.numPrizesWon + ' / ' + this.numPrizes;
+        uptimeLabel() {
+            return _.padStart(Math.floor(this.uptime / 60), 2, '0') + ':' + _.padStart(this.uptime % 60, 2, '0');
+        },
+        prizesLabel() {
+            return (this.prizesTotal - this.prizesWon) + ' / ' + this.prizesTotal;
+        },
+        prizesWon() {
+            return _.filter(this.prizes, prize => !_.isEmpty(prize.winner)).length;
+        },
+        prizesTotal() {
+            return this.prizes.length;
         }
     },
 
     data: {
-        currentUser: {
-            name: "Eoghan O'Brien",
-            email: 'eoghan@artisanscollaborative.com',
-            player_id: '123456780',
-            ip_address: '210.13.71.1',
+        uptime: 0,
+        connected: false,
+        connection: {
+            uuid: '',
+            name: "Anonymous",
+            email: 'Not Available',
+            ip_address: '127.0.0.1',
             timestamp: 0,
-            status: 'waiting'
+            type: 'anonymous',
+            resource_id: ''
         },
-        currentConnection: false,
-        numPrizes: 3,
-        numPrizesWon: 0,
-        serverUptime: 0,
-        messages: [
-            {from: 'Joseph James', created_at: '2017-02-25 10:19:00', read: false},
-            {from: 'Lettie Jordan', created_at: '2017-02-25 10:14:00', read: false},
-            {from: 'Daniel Labarge', created_at: '2017-02-25 10:08:00', read: false},
-            {from: 'Ben Batschelet', created_at: '2017-02-25 10:03:00', read: false},
-        ],
+        connections: [],
+        notifications: [],
+        topics: [],
+        prizes: [],
         menus: {
             connections: [
-                {icon: 'power', event: 'connection.spectators.disconnect', title: 'Disconnect Spectators'},
-                {icon: 'power', event: 'connection.players.disconnect', title: 'Disconnect Players'},
-                {icon: 'power', event: 'connection.all.disconnect', title: 'Disconnect All'}
+                {icon: 'power', event: 'connection.disconnect.spectators', title: 'Disconnect Spectators'},
+                {icon: 'power', event: 'connection.disconnect.players', title: 'Disconnect Players'},
+                {icon: 'power', event: 'connection.disconnect.all', title: 'Disconnect All'}
             ],
             prizes: [
-                {icon: 'plus', event: 'prizes.new', title: 'Add New Prize'},
-                {icon: 'trophy-variant-outline', event: 'prizes.winner.new', title: 'New Winner'},
+                {icon: 'plus', event: 'prizes.add', title: 'Add New Prize'},
+                {icon: 'trophy-variant-outline', event: 'prizes.pick_winner', title: 'New Winner'},
                 {icon: 'refresh', event: 'prizes.reset', title: 'Reset Prizes'}
             ],
             server: [
@@ -88,74 +136,77 @@ const app = new Vue({
         columns: [
             { name: 'Name', key: 'name', width: '' },
             { name: 'Email', key: 'email', width: '' },
-            { name: 'Player ID', key: 'player_id', width: '' },
+            { name: 'Connection', key: 'uuid', width: '' },
             { name: 'IP Address', key: 'ip_address', width: '' },
             { name: 'Time', key: 'timestamp', width: '' },
-            { name: 'Status', key: 'status', width: '80' }
+            { name: 'Status', key: 'type', width: '80' }
         ],
-        connections: [
-            {
-                name: 'Gary Bryan',
-                email: 'gary@bryan.com',
-                player_id: '123456781',
-                ip_address: '210.13.71.1',
-                timestamp: '0',
-                status: 'winner'
-            },
-            {
-                name: 'Anonymous',
-                email: 'Not Available',
-                player_id: '123456782',
-                ip_address: '210.13.71.1',
-                timestamp: 0,
-                status: 'spectator'
-            },
-            {
-                name: "Eoghan O'Brien",
-                email: 'eoghan@artisanscollaborative.com',
-                player_id: '123456780',
-                ip_address: '210.13.71.1',
-                timestamp: 0,
-                status: 'waiting'
-            },
-            {
-                name: "Ada Thompson",
-                email: 'ada@thompson.com',
-                player_id: '123456783',
-                ip_address: '210.13.71.1',
-                timestamp: 0,
-                status: 'loser'
-            },
-            {
-                name: "Lela Harris",
-                email: 'lela@harris.com',
-                player_id: '123456784',
-                ip_address: '210.13.71.1',
-                timestamp: 0,
-                status: 'ready'
-            }
-        ]
     },
 
     methods: {
-        // Prize Control Methods
-        prizeNew(e) {},
-        prizeWinner(e) {},
-        prizeReset(e) {},
-        // Server Control Methods
-        serverStart(e) {},
-        serverRestart(e) {},
-        serverStop(e) {},
+
         // Connection Control Methods
+        connect() {
+            console.log('Connecting...');
+            this.connected = true;
+        },
+        reconnect() {
+            console.log('Reconnecting...');
+            this.connected = true;
+        },
+        disconnect(uuid) {
+            console.log('Disconnect ' + uuid);
+            this.connected = false;
+        },
+        disconnectAll(type) {
+            console.log('Disconnect all');
+        },
+        disconnectType(type) {
+            console.log('Disconnect ' + type);
+        },
         disconnectSpectators() {
-            this.disconnect('spectators')
+            this.disconnectType('spectator')
         },
         disconnectPlayers() {
-            this.disconnect('players')
+            this.disconnectType('player')
         },
-        disconnect(group) {
-            group = group || 'all';
-            console.log('Disconnect ' + group);
+
+        // Prize Control Methods
+        showAddPrizeModal() {
+            console.log('Show add prize modal');
+        },
+        addPrize() {
+            console.log('Add prize');
+        },
+        pickRandomWinner() {
+            console.log('Pick new random winner');
+        },
+        showWinnerPrizeModal() {
+            console.log('Show the winner what they won');
+        },
+        resetPrizes() {
+            console.log('Reset prizes');
+        },
+
+        // Server Control Methods
+        restartServer() {
+            console.log('Restart server by sending StopServer message');
+        },
+
+        // Notification Control Methods
+        notifyConnection(uuid) {
+            console.log('Send notification to ' + uuid);
+        },
+        dismissNotifications() {
+            console.log('Dismissing all notifications');
+        },
+
+        // Auth Control Methods
+        showRegisterPrompt() {
+            console.log('Show anonymous connection the register prompt');
+        },
+        showPasswordModal() {
+            console.log('Show password confirmation modal');
         }
     }
 });

@@ -94,7 +94,9 @@ class Server implements ServerInterface
      */
     public function password($password = null)
     {
-        return $this->broker()->manager()->password($password);
+        $this->broker()->manager()->password($password);
+
+        return $this;
     }
 
     /**
@@ -165,7 +167,9 @@ class Server implements ServerInterface
      */
     public function connector(Queue $instance = null)
     {
-        return $this->broker()->manager()->connector($instance);
+        $this->broker()->manager()->connector($instance);
+
+        return $this;
     }
 
     /**
@@ -180,7 +184,9 @@ class Server implements ServerInterface
      */
     public function queue($name = null)
     {
-        return $this->broker()->manager()->queue($name);
+        $this->broker()->manager()->queue($name);
+
+        return $this;
     }
 
     /**
@@ -220,7 +226,9 @@ class Server implements ServerInterface
      */
     public function maxConnections($number = null)
     {
-        return $this->broker()->maxConnections($number);
+        $this->broker()->maxConnections($number);
+
+        return $this;
     }
 
     /**
@@ -235,7 +243,9 @@ class Server implements ServerInterface
      */
     public function logger(OutputInterface $interface = null)
     {
-        return $this->broker()->logger($interface);
+        $this->broker()->logger($interface);
+
+        return $this;
     }
 
     /**
@@ -250,6 +260,10 @@ class Server implements ServerInterface
      */
     public function broker(BrokerInterface $instance = null)
     {
+        if ( ! is_null($instance)) {
+            $instance->manager()->broker($instance);
+        }
+
         return $this->property(__METHOD__, $instance);
     }
 
@@ -296,7 +310,7 @@ class Server implements ServerInterface
     public function socket(IoServer $instance = null)
     {
         if ( ! is_null($instance)) {
-            $this->broker()->loop($instance->loop);
+            $this->broker()->manager()->loop($instance->loop);
         }
 
         return $this->property(__METHOD__, $instance);

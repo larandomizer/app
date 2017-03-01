@@ -50,7 +50,7 @@ class Connections extends Collection
         }
 
         return $this->filter(function ($connection) use ($topics) {
-            return ! empty(array_intersect($connection->topics(), $topics));
+            return ! empty($connection->subscriptions()->intersect($topics));
         });
     }
 

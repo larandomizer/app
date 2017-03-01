@@ -13,7 +13,6 @@ abstract class Command extends Fluent implements CommandInterface, ShouldQueue
 {
     use FluentProperties, Queueable;
 
-    protected $delay = 0;
     protected $dispatcher;
 
     /**
@@ -23,6 +22,7 @@ abstract class Command extends Fluent implements CommandInterface, ShouldQueue
      */
     public function __construct(array $arguments = [])
     {
+        $this->delayed(0);
     }
 
     /**
@@ -44,8 +44,8 @@ abstract class Command extends Fluent implements CommandInterface, ShouldQueue
      *
      * @return int|self
      */
-    public function delay($delay = null)
+    public function delayed($delay = null)
     {
-        return $this->property(__METHOD__, $delay);
+        return $this->property('delay', $delay);
     }
 }

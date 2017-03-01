@@ -17,11 +17,14 @@ trait FluentProperties
      */
     protected function property($property, $value = null)
     {
+        $name = explode('::', $property);
+        $name = end($name);
+
         if (is_null($value)) {
-            return $this->$property;
+            return $this->$name;
         }
 
-        $this->$property = $value;
+        $this->$name = $value;
 
         return $this;
     }

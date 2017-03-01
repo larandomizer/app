@@ -9,13 +9,16 @@
     export default {
         computed: {
             nameClass() {
-                return 'dropdown-item-' + this.name();
+                return 'dropdown-item-' + this.anchor;
             },
             iconClass() {
                 return 'mdi-' + this.icon;
             },
             link() {
-                return '#' + this.name();
+                return '#' + this.anchor;
+            },
+            anchor() {
+                return this.event.replace('.', '-').toLowerCase();
             }
         },
         props: ['event', 'icon', 'title'],
@@ -23,9 +26,6 @@
             click(e) {
                 e.preventDefault();
                 Event.fire(this.event);
-            },
-            name() {
-                return this.event.replace('.', '-').toLowerCase();
             }
         }
     }

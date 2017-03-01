@@ -13,6 +13,18 @@ use React\EventLoop\LoopInterface as Loop;
 interface Manager
 {
     /**
+     * Get or set the password the server accepts for admin commands.
+     *
+     * @example password() ==> 'opensesame'
+     *          password('opensesame') ==> self
+     *
+     * @param string $password
+     *
+     * @return string|self
+     */
+    public function password($password = null);
+
+    /**
      * Called when the server is started.
      *
      * @return self

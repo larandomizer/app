@@ -3,20 +3,25 @@
 namespace App\Server;
 
 use App\Server\Commands\AddQueueWorker;
+use App\Server\Contracts\Broker as BrokerInterface;
 use App\Server\Contracts\Command;
 use App\Server\Contracts\Connection;
 use App\Server\Contracts\Manager as ManagerInterface;
 use App\Server\Contracts\Message;
+use App\Server\Contracts\Topic;
 use App\Server\Entities\Commands;
 use App\Server\Entities\Connections;
 use App\Server\Entities\Prizes;
+use App\Server\Entities\Topics;
 use App\Server\Messages\ConnectionEstablished;
+use App\Server\Messages\CurrentUptime;
 use App\Server\Messages\PromptForAuthentication;
 use App\Server\Messages\UpdateConnections;
 use App\Server\Messages\UpdatePrizes;
 use App\Server\Messages\UpdateSubscriptions;
 use App\Server\Messages\UpdateTopics;
 use App\Server\Traits\FluentProperties;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Queue\Job;
 use Illuminate\Contracts\Queue\Queue;
@@ -32,8 +37,10 @@ class Manager implements ManagerInterface
     protected $connections;
     protected $connector;
     protected $loop;
+    protected $password;
     protected $prizes;
     protected $queue;
+    protected $start;
     protected $topics;
 
     /**
@@ -49,15 +56,35 @@ class Manager implements ManagerInterface
     }
 
     /**
+     * Get or set the password the server accepts for admin commands.
+     *
+     * @example password() ==> 'opensesame'
+     *          password('opensesame') ==> self
+     *
+     * @param string $password
+     *
+     * @return string|self
+     */
+    public function password($password = null)
+    {
+        return $this->property(__METHOD__, $password);
+    }
+
+    /**
      * Called when the server is started.
      *
      * @return self
      */
     public function start()
     {
-        $this->loop()->start();
+        $this->start = Carbon::now();
+        $this->loop()->addPeriodicTimer(1, function () {
+            $this->broadcast(new CurrentUptime($this->start), $this->connections());
+        });
 
         $this->run(new AddQueueWorker(['timing' => 1 / 10]));
+
+        $this->loop()->run();
 
         return $this;
     }
@@ -326,7 +353,7 @@ class Manager implements ManagerInterface
      *
      * @return \App\Server\Contracts\Broker|self
      */
-    public function broker(Broker $instance = null)
+    public function broker(BrokerInterface $instance = null)
     {
         return $this->property(__METHOD__, $instance);
     }

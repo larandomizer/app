@@ -6,6 +6,7 @@ use App\Server\Contracts\Broker as BrokerInterface;
 use App\Server\Contracts\Connection;
 use App\Server\Contracts\Logger as LoggerInterface;
 use App\Server\Contracts\Message;
+use App\Server\Entities\Connections;
 use App\Server\Messages\MessageException;
 use App\Server\Traits\FluentProperties;
 use App\Server\Traits\RatchetAdapter;
@@ -125,8 +126,8 @@ class Broker implements BrokerInterface, LoggerInterface, RatchetInterface
     /**
      * Broadcast message to multiple connections.
      *
-     * @param \App\Server\Contracts\Message $message
-     * @param \App\Server\Connections       $connections to send to
+     * @param \App\Server\Contracts\Message    $message
+     * @param \App\Server\Entities\Connections $connections to send to
      *
      * @return self
      */
@@ -249,7 +250,7 @@ class Broker implements BrokerInterface, LoggerInterface, RatchetInterface
     public function log($message)
     {
         if ($message instanceof Exception) {
-            $this->logger()->writeln($message->toString());
+            $this->logger()->writeln($message->getMessage());
 
             return $this;
         }
@@ -292,7 +293,7 @@ class Broker implements BrokerInterface, LoggerInterface, RatchetInterface
     {
         $arguments = (array) json_decode($message, true);
         $name = array_get($arguments, 'name');
-        $class = str_replace(class_basename($this), 'Message\\'.$name, get_class($this));
+        $class = str_replace(class_basename($this), 'Messages\\'.$name, get_class($this));
         if ( ! class_exists($class)) {
             throw new InvalidArgumentException($class.' does not exist.');
         }

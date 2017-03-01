@@ -5,11 +5,15 @@ namespace App\Server\Entities;
 use App\Server\Contracts\Connection;
 use App\Server\Contracts\Topic as TopicInterface;
 use App\Server\Traits\FluentProperties;
+use App\Server\Traits\JsonHelpers;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Contracts\Support\Jsonable;
+use JsonSerializable;
 use Ramsey\Uuid\Uuid;
 
-class Topic implements TopicInterface
+class Topic implements TopicInterface, Arrayable, Jsonable, JsonSerializable
 {
-    use FluentProperties;
+    use FluentProperties, JsonHelpers;
 
     protected $name;
     protected $subscriptions;
@@ -99,5 +103,19 @@ class Topic implements TopicInterface
         $this->subscriptions()->forget($connection->uuid());
 
         return $this;
+    }
+
+    /**
+     * Get the instance as an array.
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        return array_filter([
+            'uuid'          => $this->uuid,
+            'name'          => $this->name,
+            'subscriptions' => $this->subscriptions->toArray(),
+        ]);
     }
 }

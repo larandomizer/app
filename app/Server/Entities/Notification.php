@@ -5,11 +5,15 @@ namespace App\Server\Entities;
 use App\Server\Contracts\Connection;
 use App\Server\Contracts\Notification as NotificationInterface;
 use App\Server\Traits\FluentProperties;
+use App\Server\Traits\JsonHelpers;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Contracts\Support\Jsonable;
+use JsonSerializable;
 use Ramsey\Uuid\Uuid;
 
-class Notification implements NotificationInterface
+class Notification implements NotificationInterface, Arrayable, Jsonable, JsonSerializable
 {
-    use FluentProperties;
+    use FluentProperties, JsonHelpers;
 
     protected $sender;
     protected $uuid;
@@ -53,5 +57,18 @@ class Notification implements NotificationInterface
     public function sender(Connection $connection = null)
     {
         return $this->property(__METHOD__, $connection);
+    }
+
+    /**
+     * Get the instance as an array.
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        return array_filter([
+            'uuid'   => $this->uuid,
+            'sender' => $this->sender->toArray(),
+        ]);
     }
 }

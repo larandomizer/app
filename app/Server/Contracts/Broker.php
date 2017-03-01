@@ -39,9 +39,9 @@ interface Broker
     /**
      * Broadcast message to multiple connections.
      *
-     * @param \App\Server\Contracts\Message $message
-     * @param \App\Server\Connections       $connections to send to
-     * @param bool                          $silent      output
+     * @param \App\Server\Contracts\Message    $message
+     * @param \App\Server\Entities\Connections $connections to send to
+     * @param bool                             $silent      output
      *
      * @return self
      */

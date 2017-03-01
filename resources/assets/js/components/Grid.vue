@@ -7,7 +7,7 @@
         </thead>
         <tbody>
             <tr v-for="row in rows" @mouseenter="rowOn(row)" @mouseleave="rowOff(row)">
-                <grid-col v-for="col in columns" :id="col.key" :record="row" :current="isCurrent(row)"></grid-col>
+                <grid-col v-for="col in columns" :id="col.key" :record="row" :connection="isActive(row)"></grid-col>
             </tr>
         </tbody>
     </table>
@@ -27,10 +27,10 @@
                 });
             }
         },
-        props: ['columns', 'records', 'current'],
+        props: ['columns', 'records', 'connection'],
         methods: {
-            isCurrent(row) {
-                return !! (this.current.player_id === row.player_id);
+            isActive(row) {
+                return !! (this.connection.uuid === row.uuid);
             },
             rowOn(row) {
                 return Event.fire('grid.row.on', row);

@@ -17,7 +17,7 @@ class PickRandomWinner extends Command
     {
         $prizes = $this->dispatcher()->prizes();
 
-        $prize = $prizes->pop();
+        $prize = $prizes->available()->first();
 
         $winner = $this->dispatcher()
             ->connections()
@@ -26,6 +26,7 @@ class PickRandomWinner extends Command
 
         $winner->type(Connection::WINNER);
         $winner->prize($prize);
+        $prize->winner($winner);
 
         $everyone = $this->dispatcher()->connections();
 
