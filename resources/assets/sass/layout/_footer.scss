@@ -1,7 +1,7 @@
 .footer {
   color: #b8b9b9;
   font-size: 12px;
-  margin: 2rem 0;
+  margin: 2rem;
 
   a:hover {
     color: $brand-primary;
@@ -15,11 +15,23 @@
 
 .footer-links {
   font-size: 14px;
-  text-align: right;
+  margin: 1.5rem 0 0rem;
+  text-align: center;
+
+  @media (min-width: 576px) {
+    margin: 0;
+    text-align: right;
+  }
 
   > .footer-link {
-    margin-left: 1.5rem;
+    margin: 0 .5rem;
+
+    @media (min-width: 576px) {
+      margin-left: 1.5rem;
+      margin-right: 0;
+    }
   }
+
   > .footer-link.mdi:before {
     font-size: 20px;
     margin-right: .5rem;

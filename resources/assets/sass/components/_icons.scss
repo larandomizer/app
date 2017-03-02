@@ -4,3 +4,32 @@
   font-size: 64px;
   line-height: 64px;
 }
+
+.icon-medium {
+  font-size: 32px;
+  line-height: 32px;
+}
+
+.icon-ring {
+  border: 2px solid;
+  border-radius: 50%;
+  display: block;
+  position: relative;
+  text-align: center;
+}
+
+.icon-ring.icon-medium {
+  line-height: 46px;
+  height: 48px;
+  width: 48px;
+}
+
+.icon-ring.icon-large {
+  line-height: 94px;
+  height: 96px;
+  width: 96px;
+}
+
+.icon-ring.text-primary {
+  border-color: $pink;
+}

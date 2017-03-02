@@ -13,13 +13,21 @@ window.Event = require('./lib/Event');
 
 let Broker = require('./lib/Broker');
 
-window.Server = new Broker(
-    window.Event,
-    document.location.host,
-    document.location.port,
-    '/socket/',
-    document.location.protocol === 'https:'
-);
+function connect() {
+    try {
+        return new Broker(
+            window.Event,
+            document.location.host,
+            document.location.port,
+            '/socket/',
+            document.location.protocol === 'https:'
+        );
+    } catch (err) {
+        window.Event.fire('connection.closed', err);
+    }
+}
+
+window.Server = connect();
 
 // -----
 
@@ -69,6 +77,11 @@ const app = new Vue({
 
         // Client Commands
         Event.listen('join', registration => {
+            localStorage.setItem('first', registration.name.first);
+            localStorage.setItem('last', registration.name.last);
+            localStorage.setItem('email', registration.email);
+
+
             this.$set(this.connection, 'name', registration.name.first +' '+registration.name.last);
             this.$set(this.connection, 'email', registration.email);
             this.$set(this.connection, 'type', registration.type);
@@ -93,6 +106,12 @@ const app = new Vue({
         Event.listen('connection.reconnect', connection => {
             this.reconnect(connection.uuid);
         });
+        Event.listen('connection.closed', err => {
+            this.connected = false;
+        });
+        Event.listen('connection.failed', err => {
+            this.connected = false;
+        });
         Event.listen('connection.disconnect.players', () => {
             console.log('Disconnect spectators');
         });
@@ -104,12 +123,17 @@ const app = new Vue({
         });
         Event.listen('server.restart', () => {
             console.log('Restart server by sending StopServer message');
+            Server.send('StopServer', {
+                password: this.password
+            });
         });
         Event.listen('prizes.add', () => {
             this.showAddPrizeModal();
         });
         Event.listen('prizes.pick_winner', () => {
-            Server.send('AwardWinner', {});
+            Server.send('AwardWinner', {
+                password: this.password
+            });
         });
         Event.listen('prizes.reset', () => {
             console.log('Reset prizes');
@@ -135,6 +159,8 @@ const app = new Vue({
     },
 
     data: {
+        password: '',
+        showPasswordModal: false,
         showWinnerModal: false,
         uptime: 0,
         registered: false,
@@ -171,7 +197,7 @@ const app = new Vue({
             'name': 'Name',
             'email': 'Email',
             'uuid': 'Connection',
-            'ipAddress': 'IP Address',
+            'ipAddress': 'IP',
             'timestamp': 'Time',
             'type': 'Status'
         }
@@ -181,8 +207,7 @@ const app = new Vue({
 
         // Connection Control Methods
         connect() {
-            console.log('Connecting...');
-            this.connected = true;
+            connect();
         },
         reconnect() {
             console.log('Reconnecting...');
@@ -208,6 +233,16 @@ const app = new Vue({
         },
         showPasswordModal() {
             console.log('Show password confirmation modal');
+        },
+        sendAuthentication() {
+            Server.send('Authenicate', {
+                password: this.password
+            })
+            this.password = '';
         }
     }
 });
+
+window.onbeforeunload = function() {
+    return "Are you sure you want to disconnect?";
+};
