@@ -177,3 +177,51 @@
     top: -4px;
   }
 }
+
+// Card Form
+.card-form .card-header {
+  text-align: center;
+  color: #666666;
+}
+
+.card-form .card-body {
+  padding: 2rem;
+  border-top: 1px solid #eeeeee;
+}
+
+.card-form .control-group {
+  margin-bottom: 2rem;
+}
+
+.card-form .form-control {
+  padding: 1rem;
+}
+
+.card-form .btn {
+  cursor: pointer;
+  font-size: 10px;
+  letter-spacing: .1rem;
+  padding: 1rem 0;
+  text-transform: uppercase;
+}
+
+.card-form .btn-primary {
+  background-color: $btn-primary-bg;
+  border: 2px solid $btn-primary-bg;
+
+  &:hover {
+    background-color: #ffffff;
+    color: $btn-primary-bg;
+  }
+}
+
+.card-form .btn-default {
+  background-color: #ffffff;
+  border: 2px solid $btn-default-border;
+  color: $btn-default-border;
+
+  &:hover {
+    background-color: $btn-default-border;
+    color: #ffffff;
+  }
+}
