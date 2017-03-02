@@ -6,14 +6,18 @@
             <a class="connection-ping" @click="notify" v-show="showNotifier" v-if="!active"><i class="mdi mdi-bell"></i></a>
         </span>
     </td>
-    <td v-else-if="id === 'email'">{{ record[id] || 'Not available' }}</span></td>
+    <td v-else-if="id === 'email'">
+        <span>{{ record[id] || 'Not available' }}</span>
+    </td>
     <td v-else-if="id === 'timestamp'">
         <span class="d-flex align-content-center">
             <i class="mdi mdi-clock d-inline-flex pr-2"></i>
             <span class="d-inline-flex">{{ record[id] }}</span>
         </span>
     </td>
-    <td v-else-if="id === 'type'"><span class="badge badge-block" :class="typeClass">{{ record[id] }}</span></td>
+    <td v-else-if="id === 'type'">
+        <span class="badge badge-block" :class="typeClass">{{ record[id] }}</span>
+    </td>
     <td v-else>{{ record[id] }}</td>
 </template>
 

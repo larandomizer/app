@@ -31,6 +31,8 @@ Vue.component('connection', require('./components/Connection.vue'));
 Vue.component('notifications', require('./components/Notifications.vue'));
 Vue.component('grid-col', require('./components/GridColumn.vue'));
 Vue.component('grid', require('./components/Grid.vue'));
+Vue.component('modal', require('./components/Modal.vue'));
+Vue.component('join-form', require('./components/JoinForm.vue'));
 
 // -----
 
@@ -66,6 +68,15 @@ const app = new Vue({
         });
 
         // Client Commands
+        Event.listen('join', registration => {
+            this.$set(this.connection, 'name', registration.name.first +' '+registration.name.last);
+            this.$set(this.connection, 'email', registration.email);
+            this.$set(this.connection, 'type', registration.type);
+            this.registered = true;
+
+            // Server.send('JoinAsPlayer', registration);
+            // Server.send('JoinAsSpectator', registration);
+        });
         Event.listen('notification.dismiss.all', () => {
             console.log('Dismissing all notifications');
         });
@@ -117,11 +128,16 @@ const app = new Vue({
         },
         prizesTotal() {
             return this.prizes.length;
+        },
+        isRegistered() {
+            return this.registered;
         }
     },
 
     data: {
+        showWinnerModal: false,
         uptime: 0,
+        registered: false,
         connected: false,
         connection: {
             uuid: '',
@@ -183,6 +199,7 @@ const app = new Vue({
         },
         showWinnerPrizeModal() {
             console.log('Show the winner what they won');
+            this.showWinnerModal = true;
         },
 
         // Auth Control Methods
