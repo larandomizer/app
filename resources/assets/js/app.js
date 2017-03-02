@@ -81,7 +81,6 @@ const app = new Vue({
             localStorage.setItem('last', registration.name.last);
             localStorage.setItem('email', registration.email);
 
-
             this.$set(this.connection, 'name', registration.name.first +' '+registration.name.last);
             this.$set(this.connection, 'email', registration.email);
             this.$set(this.connection, 'type', registration.type);
@@ -119,6 +118,7 @@ const app = new Vue({
             console.log('Disconnect spectators');
         });
         Event.listen('connection.disconnect.all', () => {
+            this.displayPasswordModal();
             console.log('Disconnect all connections');
         });
         Event.listen('server.restart', () => {
@@ -128,7 +128,7 @@ const app = new Vue({
             });
         });
         Event.listen('prizes.add', () => {
-            this.showAddPrizeModal();
+            this.displayAddPrizeModal();
         });
         Event.listen('prizes.pick_winner', () => {
             Server.send('AwardWinner', {
@@ -160,6 +160,11 @@ const app = new Vue({
 
     data: {
         password: '',
+        prize: {
+            name: null,
+            sponsor: null
+        },
+        showAddPrizeModal: false,
         showPasswordModal: false,
         showWinnerModal: false,
         uptime: 0,
@@ -219,26 +224,33 @@ const app = new Vue({
         },
 
         // Prize Control Methods
-        showAddPrizeModal() {
-            console.log('Show add prize modal');
+        displayAddPrizeModal() {
+            this.showAddPrizeModal = true;
         },
-        showWinnerPrizeModal() {
+        sendNewPrize() {
+            this.showAddPrizeModal = false;
+            this.prize.name = null;
+            this.prize.sponsor = null;
+        },
+        displayWinnerPrizeModal() {
             console.log('Show the winner what they won');
             this.showWinnerModal = true;
         },
 
         // Auth Control Methods
-        showRegisterPrompt() {
+        displayRegisterPrompt() {
             console.log('Show anonymous connection the register prompt');
         },
-        showPasswordModal() {
+        displayPasswordModal() {
             console.log('Show password confirmation modal');
+            this.showPasswordModal = true;
         },
         sendAuthentication() {
+            this.password = '';
+            this.showPasswordModal = false;
             Server.send('Authenicate', {
                 password: this.password
             })
-            this.password = '';
         }
     }
 });

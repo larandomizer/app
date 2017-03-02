@@ -2,19 +2,19 @@
     <form method="post" action="#join" v-on:submit.prevent="register">
         <div class="row">
             <div class="col-6">
-                <div class="control-group">
+                <div class="form-group">
                     <input id="first_name" name="first_name" type="text" v-model="registration.name.first" class="form-control" placeholder="First Name" required />
                 </div>
             </div>
             <div class="col-6">
-                <div class="control-group">
+                <div class="form-group">
                     <input id="last_name" name="last_name" type="text" v-model="registration.name.last" class="form-control" placeholder="Last Name" required />
                 </div>
             </div>
         </div>
         <div class="row">
             <div class="col-12">
-                <div class="control-group">
+                <div class="form-group">
                     <input id="email" name="email" type="email" v-model="registration.email" class="form-control" placeholder="Email" required />
                 </div>
             </div>
