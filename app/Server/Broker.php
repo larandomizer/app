@@ -298,6 +298,6 @@ class Broker implements BrokerInterface, LoggerInterface, RatchetInterface
             throw new InvalidArgumentException($class.' does not exist.');
         }
 
-        return $message;
+        return new $class($arguments);
     }
 }
