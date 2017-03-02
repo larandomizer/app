@@ -90,7 +90,9 @@ const app = new Vue({
             // Server.send('JoinAsSpectator', registration);
         });
         Event.listen('notification.dismiss.all', () => {
-            console.log('Dismissing all notifications');
+            Server.send('DismissNotifications', {
+                connection: this.connection.uuid
+            });
         });
         Event.listen('notification.send', connection => {
             Server.send('NotifyConnection', {
@@ -113,13 +115,15 @@ const app = new Vue({
         });
         Event.listen('connection.disconnect.players', () => {
             console.log('Disconnect spectators');
+            this.displayPasswordModal();
         });
         Event.listen('connection.disconnect.spectators', () => {
             console.log('Disconnect spectators');
+            this.displayPasswordModal();
         });
         Event.listen('connection.disconnect.all', () => {
-            this.displayPasswordModal();
             console.log('Disconnect all connections');
+            this.displayPasswordModal();
         });
         Event.listen('server.restart', () => {
             console.log('Restart server by sending StopServer message');
@@ -137,6 +141,9 @@ const app = new Vue({
         });
         Event.listen('prizes.reset', () => {
             console.log('Reset prizes');
+            Server.send('ResetPrizes', {
+                password: this.password
+            });
         });
     },
 
@@ -242,7 +249,6 @@ const app = new Vue({
             console.log('Show anonymous connection the register prompt');
         },
         displayPasswordModal() {
-            console.log('Show password confirmation modal');
             this.showPasswordModal = true;
         },
         sendAuthentication() {
@@ -250,7 +256,7 @@ const app = new Vue({
             this.showPasswordModal = false;
             Server.send('Authenicate', {
                 password: this.password
-            })
+            });
         }
     }
 });
