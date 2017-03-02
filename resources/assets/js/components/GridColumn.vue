@@ -73,7 +73,7 @@
         methods: {
             notify(e) {
                 e.preventDefault();
-                Event.fire('notification.send', this.record);
+                Event.fire('NotificationSend', this.record);
             }
         }
     }

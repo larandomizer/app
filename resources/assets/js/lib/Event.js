@@ -17,6 +17,7 @@ class Event {
      * @param data
      */
     fire(event, data = null) {
+        console.log(event, data);
         this.vue.$emit(event, data);
     }
 
@@ -27,6 +28,7 @@ class Event {
      * @param data
      */
     once(event, data = null) {
+        console.log(event, data);
         this.vue.$once(event, data);
     }
 

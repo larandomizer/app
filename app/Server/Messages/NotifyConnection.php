@@ -2,8 +2,8 @@
 
 namespace App\Server\Messages;
 
-use App\Server\Entities\Message;
 use App\Server\Commands\NotifyConnection as NotifyConnectionCommand;
+use App\Server\Entities\Message;
 
 class NotifyConnection extends Message
 {

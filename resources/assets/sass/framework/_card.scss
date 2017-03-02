@@ -1,7 +1,5 @@
-@import "../../../node_modules/bootstrap/scss/card";
-
 .card {
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 // Card Stat
@@ -14,9 +12,18 @@
     width: 100%;
   }
 
-  @media (min-width: 992px) {
+  @include media-breakpoint-up(lg) {
     padding: 2rem;
   }
+
+
+  @include media-breakpoint-down(xs) {
+    &.card-stat-connections,
+    &.card-stat-uptime {
+      margin-bottom: $grid-gutter-width-base / 2;
+    }
+  }
+
 
   // Icon
   .card-icon {
@@ -32,6 +39,7 @@
     @media (min-width: 576px) and (max-width: 767px) {
       display: inline-block;
       float: none;
+      margin-bottom: $grid-gutter-width-base / 2;
     }
 
     @media (min-width: 992px) {
@@ -57,6 +65,7 @@
       margin-left: 1.5rem;
     }
   }
+
   .card-title {
     color: #4a4a4a;
     font-size: 24px;
@@ -68,6 +77,7 @@
       margin-bottom: 1.25rem;
     }
   }
+
   .card-subtitle {
     color: #b3b3b3;
     font-size: 0.8rem;
@@ -76,7 +86,6 @@
       font-size: 1rem;
     }
   }
-
 }
 
 .card-stat-uptime,
@@ -126,16 +135,19 @@
   .dropdown-menu {
     left: auto;
     right: -20%;
+
     // Arrow
-    &:before, &:after {
+    &::before, &::after {
       left: auto;
       margin-left: initial !important;
       right: 40px;
     }
-    &:after {
+
+    &::after {
       margin-right: -15px;
     }
-    &:before {
+
+    &::before {
       margin-right: -16px;
     }
   }
@@ -166,13 +178,16 @@
   th {
     color: #666666;
   }
+
   td {
     color: #999999;
   }
+
   th, td {
     font-size: 13px;
     padding-left: 1.25rem;
   }
+
   .mdi {
     font-size: 20px;
     position: relative;

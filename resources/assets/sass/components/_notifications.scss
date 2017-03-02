@@ -25,7 +25,12 @@
       top: 110%;
     }
 
-    &:after {
+
+    &::before, &::after {
+      right: calc(50% - 14px);
+    }
+
+    &::after {
       border-bottom-color: #f7f7f9;
     }
 
@@ -54,6 +59,6 @@
 
 // Nav notifications in the header
 .header .navbar-nav .nav-notifications .nav-link {
-  margin: 0 !important;;
+  margin: 0 !important;
   padding: 0 !important;
 }

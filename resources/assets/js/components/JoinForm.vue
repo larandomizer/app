@@ -48,7 +48,7 @@
         },
         methods: {
             register() {
-                Event.fire('join', this.registration);
+                Event.fire('Join', this.registration);
             }
         }
     }

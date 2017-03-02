@@ -7,12 +7,16 @@
   }
 }
 
-
 // User & Connection - Connected Shared Styles
 .nav-user.is-connected,
 .nav-connection.is-connected {
   .mdi {
     color: $brand-primary;
+
+    @include media-breakpoint-up(lg) {
+      position: relative;
+      top: 2px;
+    }
   }
 }
 

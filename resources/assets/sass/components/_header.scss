@@ -1,8 +1,9 @@
 // Header Layout
 .header {
   background-color: $navbar-default-bg;
-  box-shadow: 0 3px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 3px 3px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
+  height: 90px;
 }
 
 .header .container {
@@ -24,14 +25,14 @@
     padding-right: 2em;
     margin-right: 2em;
 
-    &:after {
+    &::after {
       background-color: #f5f5f5;
-      bottom: -65%;
-      content: "";
+      top: -25px;
+      content: '';
       right: 0;
       position: absolute;
-      top: -65%;
       width: 2px;
+      height: 90px;
     }
   }
 }
@@ -55,12 +56,12 @@
   @media (max-width: 991px) {
     right: 32px;
     position: absolute;
-    top: 0;
+    top: 3px;
 
     .nav-notifications {
       position: absolute;
-      left: -32px;
-      top: 0;
+      left: -20px;
+      top: -2px;
 
       .dropdown-menu {
         position: absolute;
@@ -72,7 +73,13 @@
   }
 
   @media (max-width: 430px) {
-    right: 40%;
+    right: 70px;
+
+    .nav-notifications {
+      position: absolute;
+      left: 0;
+      top: -2px;
+    }
 
     .nav-user {
       display: none !important;

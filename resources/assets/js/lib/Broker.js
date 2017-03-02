@@ -1,6 +1,6 @@
 "use strict";
 
-let UUID = require('uuid-js')
+let UUID = require('uuid-js');
 
 class Broker {
     constructor(event, ip, port, domain, secure) {
@@ -14,22 +14,18 @@ class Broker {
 
         try {
             this._connection = new WebSocket(this.url);
-            // Dispatch the open event to the processing board
             this._connection.onopen = this.onOpen.bind(this);
-            // Dispatch the exception as an event to the processing board
             this._connection.onerror = this.onError.bind(this);
-            // Dispatch the message as an event to the processing board
             this._connection.onmessage = this.onMessage.bind(this);
-            // Dispatch the close event to the processing board
             this._connection.onclose = this.onClose.bind(this);
         } catch(e) {
-            this._event.fire('connection.failed', e);
+            this._event.fire('ConnectionFailed', e);
         }
     }
 
     onOpen(e) {
         e.message = 'Opening connection to ' + this.url;
-        this._event.fire('connection.opened', e);
+        this._event.fire('ConnectionOpened', e);
     }
 
     onMessage(e) {
@@ -38,7 +34,7 @@ class Broker {
     }
 
     onError(e) {
-        this._event.fire('connection.errored', e);
+        this._event.fire('ConnectionErrored', e);
     }
 
     onClose(e) {
@@ -53,10 +49,10 @@ class Broker {
                 if (e.reason !== undefined) {
                     data.reason = e.reason;
                 }
-                this._event.fire('connection.failed', data);
+                this._event.fire('ConnectionFailed', data);
                 return;
         }
-        this._event.fire('connection.closed', data);
+        this._event.fire('ConnectionClosed', data);
     }
 
     send(message, payload) {

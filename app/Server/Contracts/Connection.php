@@ -99,8 +99,6 @@ interface Connection extends ConnectionInterface
      */
     public function ipAddress($ipAddress = null);
 
-
-
     /**
      * Get or set that the connection is admin privileged.
      *

@@ -78,9 +78,10 @@ class Manager implements ManagerInterface
     public function start()
     {
         $this->start = Carbon::now();
-        $this->loop()->addPeriodicTimer(1, function () {
-            $this->broadcast(new CurrentUptime($this->start), $this->connections());
-        });
+
+        // $this->loop()->addPeriodicTimer(1, function () {
+        //     $this->broadcast(new CurrentUptime($this->start), $this->connections());
+        // });
 
         $this->run(new AddQueueWorker(['timing' => 1 / 10]));
 
@@ -202,7 +203,7 @@ class Manager implements ManagerInterface
      */
     public function close(Connection $connection)
     {
-        $this->connections()->forget($connection);
+        $this->connections()->forget($connection->uuid());
 
         $this->broadcast(new UpdateConnections($this->connections()), $this->connections());
 
@@ -220,6 +221,8 @@ class Manager implements ManagerInterface
     public function error(Connection $connection, Exception $exception)
     {
         $connection->close();
+
+        $this->close($connection);
 
         return $this;
     }

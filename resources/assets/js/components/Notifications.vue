@@ -12,7 +12,7 @@
             <div class="nav-notifications-list" v-if="notificationsCount">
                 <div class="dropdown-item d-flex" href="#" v-for="notification in notifications">
                     <i class="mdi mdi-account-circle nav-notification-icon"></i>
-                    <span class="d-inline-flex align-items-center">{{ notification.sender }}</span>
+                    <span class="d-inline-flex align-items-center">{{ NotificationSender }}</span>
                     <span class="d-inline-flex align-items-center ml-auto nav-notification-time">{{ ago(notification) }}</span>
                 </div>
             </div>
@@ -39,7 +39,7 @@
             },
             dismissAllNotifications(e) {
                 e.preventDefault();
-                Event.fire('notification.dismiss.all');
+                Event.fire('DismissAllNotifications');
             }
         }
     }

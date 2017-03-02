@@ -1,4 +1,3 @@
-
 /**
  * First we will load all of this project's JavaScript dependencies which
  * includes Vue and other libraries. It is a great starting point when
@@ -7,10 +6,12 @@
 
 require('./bootstrap');
 
-// -----
+window.onbeforeunload = function() {
+    return "Are you sure you want to disconnect?";
+};
 
+window.Server;
 window.Event = require('./lib/Event');
-
 let Broker = require('./lib/Broker');
 
 function connect() {
@@ -23,13 +24,9 @@ function connect() {
             document.location.protocol === 'https:'
         );
     } catch (err) {
-        window.Event.fire('connection.closed', err);
+        window.Event.fire('ConnectionClosed', err);
     }
 }
-
-window.Server = connect();
-
-// -----
 
 Vue.component('stat-dropdown-item', require('./components/StatDropdownItem.vue'));
 Vue.component('stat-dropdown', require('./components/StatDropdown.vue'));
@@ -41,8 +38,6 @@ Vue.component('grid-col', require('./components/GridColumn.vue'));
 Vue.component('grid', require('./components/Grid.vue'));
 Vue.component('modal', require('./components/Modal.vue'));
 Vue.component('join-form', require('./components/JoinForm.vue'));
-
-// -----
 
 const app = new Vue({
     el: '#app',
@@ -76,74 +71,64 @@ const app = new Vue({
         });
 
         // Client Commands
-        Event.listen('join', registration => {
+        Event.listen('Join', registration => {
             localStorage.setItem('first', registration.name.first);
             localStorage.setItem('last', registration.name.last);
             localStorage.setItem('email', registration.email);
 
-            this.$set(this.connection, 'name', registration.name.first +' '+registration.name.last);
-            this.$set(this.connection, 'email', registration.email);
-            this.$set(this.connection, 'type', registration.type);
-            this.registered = true;
+            if( registration.type === 'player' ) {
+                Server.send('JoinAsPlayer', registration);
+            } else {
+                Server.send('JoinAsSpectator', registration);
+            }
 
-            // Server.send('JoinAsPlayer', registration);
-            // Server.send('JoinAsSpectator', registration);
+            // this.$set(this.connection, 'name', registration.name.first +' '+registration.name.last);
+            // this.$set(this.connection, 'email', registration.email);
+            // this.$set(this.connection, 'type', registration.type);
         });
-        Event.listen('notification.dismiss.all', () => {
+        Event.listen('DismissAllNotifications', () => {
             Server.send('DismissNotifications', {
                 connection: this.connection.uuid
             });
         });
-        Event.listen('notification.send', connection => {
+        Event.listen('NotificationSend', connection => {
             Server.send('NotifyConnection', {
                 sender: this.connection.uuid,
                 receiver: connection.uuid
             });
         });
-        Event.listen('connection.disconnect', connection => {
-            console.log('Disconnect ' + connection.uuid);
+        Event.listen('Disconnect', connection => {
             this.disconnect(connection.uuid);
         });
-        Event.listen('connection.reconnect', connection => {
+        Event.listen('Reconnect', connection => {
             this.reconnect(connection.uuid);
         });
-        Event.listen('connection.closed', err => {
+        Event.listen('ConnectionClosed', err => {
             this.connected = false;
         });
-        Event.listen('connection.failed', err => {
+        Event.listen('ConnectionFailed', err => {
             this.connected = false;
         });
-        Event.listen('connection.disconnect.players', () => {
-            console.log('Disconnect spectators');
+        Event.listen('DisconnectPlayers', () => {
             this.displayPasswordModal();
         });
-        Event.listen('connection.disconnect.spectators', () => {
-            console.log('Disconnect spectators');
+        Event.listen('DisconnectSpectators', () => {
             this.displayPasswordModal();
         });
-        Event.listen('connection.disconnect.all', () => {
-            console.log('Disconnect all connections');
+        Event.listen('DisconnectAll', () => {
             this.displayPasswordModal();
         });
-        Event.listen('server.restart', () => {
-            console.log('Restart server by sending StopServer message');
-            Server.send('StopServer', {
-                password: this.password
-            });
+        Event.listen('RestartServer', () => {
+            Server.send('StopServer');
         });
-        Event.listen('prizes.add', () => {
+        Event.listen('NewPrize', () => {
             this.displayAddPrizeModal();
         });
-        Event.listen('prizes.pick_winner', () => {
-            Server.send('AwardWinner', {
-                password: this.password
-            });
+        Event.listen('PickRandomWinner', () => {
+            Server.send('PickRandomWinner');
         });
-        Event.listen('prizes.reset', () => {
-            console.log('Reset prizes');
-            Server.send('ResetPrizes', {
-                password: this.password
-            });
+        Event.listen('ResetPrizes', () => {
+            Server.send('ResetPrizes');
         });
     },
 
@@ -161,7 +146,7 @@ const app = new Vue({
             return this.prizes.length;
         },
         isRegistered() {
-            return this.registered;
+            return this.connection.type !== 'anonymous';
         }
     },
 
@@ -175,7 +160,6 @@ const app = new Vue({
         showPasswordModal: false,
         showWinnerModal: false,
         uptime: 0,
-        registered: false,
         connected: false,
         connection: {
             uuid: '',
@@ -192,24 +176,24 @@ const app = new Vue({
         prizes: [],
         menus: {
             connections: [
-                {icon: 'power', event: 'connection.disconnect.spectators', title: 'Disconnect Spectators'},
-                {icon: 'power', event: 'connection.disconnect.players', title: 'Disconnect Players'},
-                {icon: 'power', event: 'connection.disconnect.all', title: 'Disconnect All'}
+                {icon: 'power', event: 'DisconnectSpectators', title: 'Disconnect Spectators'},
+                {icon: 'power', event: 'DisconnectPlayers', title: 'Disconnect Players'},
+                {icon: 'power', event: 'DisconnectAll', title: 'Disconnect All'}
             ],
             prizes: [
-                {icon: 'plus', event: 'prizes.add', title: 'Add New Prize'},
-                {icon: 'trophy-variant-outline', event: 'prizes.pick_winner', title: 'New Winner'},
-                {icon: 'refresh', event: 'prizes.reset', title: 'Reset Prizes'}
+                {icon: 'plus', event: 'NewPrize', title: 'Add New Prize'},
+                {icon: 'trophy-variant-outline', event: 'PickRandomWinner', title: 'New Winner'},
+                {icon: 'refresh', event: 'ResetPrizes', title: 'Reset Prizes'}
             ],
             server: [
-                {icon: 'autorenew', event: 'server.restart', title: 'Restart Server'}
+                {icon: 'autorenew', event: 'RestartServer', title: 'Restart Server'}
             ],
         },
         columns: {
             'name': 'Name',
             'email': 'Email',
             'uuid': 'Connection',
-            'ipAddress': 'IP',
+            'ip_address': 'IP Address',
             'timestamp': 'Time',
             'type': 'Status'
         }
@@ -219,15 +203,35 @@ const app = new Vue({
 
         // Connection Control Methods
         connect() {
-            connect();
+            window.Server = connect();
         },
         reconnect() {
-            console.log('Reconnecting...');
-            this.connected = true;
+            if( this.connected ) {
+                this.disconnect(this.connection.uuid);
+            }
+            this.connect();
         },
         disconnect(uuid) {
-            console.log('Disconnect ' + uuid);
+            Server.close();
+            this.connection = {
+                uuid: '',
+                name: "Anonymous",
+                email: 'Not Available',
+                ip_address: '127.0.0.1',
+                timestamp: 0,
+                type: 'anonymous',
+                resource_id: ''
+            };
             this.connected = false;
+            this.connections = [];
+            this.notifications = [];
+            this.prizes = [];
+            this.topics = [];
+            this.uptime = 0;
+            this.prize = {
+                name:null,
+                sponsor:null
+            };
         },
 
         // Prize Control Methods
@@ -240,13 +244,11 @@ const app = new Vue({
             this.prize.sponsor = null;
         },
         displayWinnerPrizeModal() {
-            console.log('Show the winner what they won');
             this.showWinnerModal = true;
         },
 
         // Auth Control Methods
         displayRegisterPrompt() {
-            console.log('Show anonymous connection the register prompt');
         },
         displayPasswordModal() {
             this.showPasswordModal = true;
@@ -261,6 +263,3 @@ const app = new Vue({
     }
 });
 
-window.onbeforeunload = function() {
-    return "Are you sure you want to disconnect?";
-};

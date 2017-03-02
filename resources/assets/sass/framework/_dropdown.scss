@@ -1,30 +1,32 @@
-@import "../../../node_modules/bootstrap/scss/dropdown";
-
 .dropdown {
   // Dropdown Menu
   .dropdown-menu {
     padding-bottom: 0;
+    border-color: #f3f5f7;
+    padding-top: 0;
 
-    &:before, &:after {
+    &::before, &::after {
       border: solid transparent;
       bottom: 100%;
-      content: "";
+      content: '';
       display: block;
       height: 0;
-      left: 50%;
+      right: 40px;
       pointer-events: none;
       position: absolute;
       width: 0;
     }
-    &:after {
-      border-color: rgba(136, 183, 213, 0);
+
+    &::after {
+      border-color: transparent;
       border-bottom-color: #ffffff;
       border-width: 15px;
       margin-left: -15px;
     }
-    &:before {
-      border-color: rgba(194, 225, 245, 0);
-      border-bottom-color: rgba(0, 0, 0, 0.15);
+
+    &::before {
+      border-color: transparent;
+      border-bottom-color: #f3f5f7;
       border-width: 16px;
       margin-left: -16px;
     }
@@ -42,7 +44,7 @@
     }
 
     &:not(:last-child) {
-      border-bottom: 2px solid #f3f5f7;
+      border-bottom: 1px solid #f3f5f7;
     }
   }
 }
