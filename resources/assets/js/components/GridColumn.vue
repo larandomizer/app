@@ -12,7 +12,7 @@
     <td v-else-if="id === 'timestamp'">
         <span class="d-flex align-content-center">
             <i class="mdi mdi-clock d-inline-flex pr-2"></i>
-            <span class="d-inline-flex">{{ record[id] }}</span>
+            <span class="d-inline-flex">{{ ago(record[id]) }}</span>
         </span>
     </td>
     <td v-else-if="id === 'type'">
@@ -22,6 +22,8 @@
 </template>
 
 <script>
+    import * as moment from 'moment';
+
     let typeMap = {
         'winner': 'badge-warning',
         'anonymous': 'badge-info',
@@ -44,9 +46,7 @@
                 }
             });
             Event.listen('grid.row.off', row => {
-                if (row.uuid === this.record.uuid) {
-                    this.showNotifier = false;
-                }
+                this.showNotifier = false;
             });
         },
         computed: {
@@ -71,6 +71,9 @@
             'active': {type: Boolean, 'default': false }
         },
         methods: {
+            ago(timestamp) {
+                return moment.unix(timestamp).fromNow();
+            },
             notify(e) {
                 e.preventDefault();
                 Event.fire('NotificationSend', this.record);

@@ -35,7 +35,7 @@
         },
         methods: {
             ago(notification) {
-                return moment(notification.created_at, moment.ISO_8601).fromNow()
+                return moment(notification.created_at, moment.ISO_8601).fromNow();
             },
             dismissAllNotifications(e) {
                 e.preventDefault();

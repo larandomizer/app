@@ -7,6 +7,7 @@ use App\Server\Contracts\Prize;
 use App\Server\Contracts\Topic;
 use App\Server\Traits\FluentProperties;
 use App\Server\Traits\JsonHelpers;
+use Carbon\Carbon;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
 use JsonSerializable;
@@ -24,6 +25,7 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
     protected $prize;
     protected $socket;
     protected $subscriptions;
+    protected $timestamp;
     protected $type;
     protected $uuid;
     protected $ipAddress;
@@ -36,6 +38,7 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
     public function __construct(SocketInterface $instance)
     {
         $this->socket($instance);
+        $this->timestamp(Carbon::now());
         $this->uuid(Uuid::uuid4()->toString());
         $this->ipAddress($instance->remoteAddress);
         $this->type(ConnectionInterface::ANONYMOUS);
@@ -57,6 +60,21 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
     public function socket(SocketInterface $interface = null)
     {
         return $this->property(__METHOD__, $interface);
+    }
+
+    /**
+     * Get or set the timestamp when the connection was opened.
+     *
+     * @example timestamp() ==> \Carbon\Carbon
+     *          timestamp($timestamp) ==> self
+     *
+     * @param \Carbon\Carbon $timestamp
+     *
+     * @return \Carbon\Carbon|self
+     */
+    public function timestamp(Carbon $timestamp = null)
+    {
+        return $this->property(__METHOD__, $timestamp);
     }
 
     /**
@@ -255,10 +273,12 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
             'type'          => $this->type,
             'admin'         => $this->admin,
             'name'          => $this->name,
+            'email'         => $this->email,
             'notifications' => $this->notifications->toArray(),
             'subscriptions' => $this->subscriptions->toArray(),
             'prize'         => $this->prize ? $this->prize->toArray() : null,
             'ipAddress'     => $this->ipAddress,
+            'timestamp'     => $this->timestamp->timestamp,
         ]);
     }
 }

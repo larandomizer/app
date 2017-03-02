@@ -45,8 +45,10 @@ const app = new Vue({
     created() {
         // Server Messages
         Event.listen('ConnectionEstablished', message => {
-            message.connection.timestamp = message.timestamp;
             this.connected = true;
+            this.connection = message.connection;
+        });
+        Event.listen('ConnectionRegistered', message => {
             this.connection = message.connection;
         });
         Event.listen('UpdateConnections', message => {
@@ -72,19 +74,15 @@ const app = new Vue({
 
         // Client Commands
         Event.listen('Join', registration => {
-            localStorage.setItem('first', registration.name.first);
-            localStorage.setItem('last', registration.name.last);
+            localStorage.setItem('first_name', registration.name.first);
+            localStorage.setItem('last_name', registration.name.last);
             localStorage.setItem('email', registration.email);
 
             if( registration.type === 'player' ) {
-                Server.send('JoinAsPlayer', registration);
+                Server.send('JoinAsPlayer', {registration});
             } else {
-                Server.send('JoinAsSpectator', registration);
+                Server.send('JoinAsSpectator', {registration});
             }
-
-            // this.$set(this.connection, 'name', registration.name.first +' '+registration.name.last);
-            // this.$set(this.connection, 'email', registration.email);
-            // this.$set(this.connection, 'type', registration.type);
         });
         Event.listen('DismissAllNotifications', () => {
             Server.send('DismissNotifications', {
@@ -165,7 +163,7 @@ const app = new Vue({
             uuid: '',
             name: "Anonymous",
             email: 'Not Available',
-            ip_address: '127.0.0.1',
+            ipAddress: '127.0.0.1',
             timestamp: 0,
             type: 'anonymous',
             resource_id: ''
@@ -193,7 +191,7 @@ const app = new Vue({
             'name': 'Name',
             'email': 'Email',
             'uuid': 'Connection',
-            'ip_address': 'IP Address',
+            //'ipAddress': 'IP Address',
             'timestamp': 'Time',
             'type': 'Status'
         }
@@ -262,4 +260,3 @@ const app = new Vue({
         }
     }
 });
-

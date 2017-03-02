@@ -3,6 +3,7 @@
 namespace App\Server\Contracts;
 
 use App\Server\Entities\Topics;
+use Carbon\Carbon;
 use Ratchet\ConnectionInterface;
 
 interface Connection extends ConnectionInterface
@@ -24,6 +25,18 @@ interface Connection extends ConnectionInterface
      * @return \Ratchet\ConnectionInterface|self
      */
     public function socket(ConnectionInterface $interface = null);
+
+    /**
+     * Get or set the timestamp when the connection was opened.
+     *
+     * @example timestamp() ==> \Carbon\Carbon
+     *          timestamp($timestamp) ==> self
+     *
+     * @param \Carbon\Carbon $timestamp
+     *
+     * @return \Carbon\Carbon|self
+     */
+    public function timestamp(Carbon $timestamp = null);
 
     /**
      * Send data to the connection.
