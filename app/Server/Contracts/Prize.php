@@ -43,12 +43,12 @@ interface Prize
     /**
      * Get or set the winner of the prize.
      *
-     * @example winner() ==> \App\Server\Contract\Connection
-     *          winner($winner) ==> self
+     * @example winner() ==> string
+     *          winner($uuid) ==> self
      *
-     * @param \App\Server\Contract\Connection $winner
+     * @param string $winner
      *
-     * @return \App\Server\Contract\Connection|self
+     * @return string|self
      */
-    public function winner(Connection $winner = null);
+    public function winner($uuid = null);
 }

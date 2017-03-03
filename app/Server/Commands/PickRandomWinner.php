@@ -18,15 +18,18 @@ class PickRandomWinner extends Command
         $prizes = $this->dispatcher()->prizes();
 
         $prize = $prizes->available()->first();
+        if ( ! $prize) {
+            return;
+        }
 
         $winner = $this->dispatcher()
             ->connections()
-            ->type(Connection::PLAYER)
+            ->types(Connection::PLAYER)
             ->random();
 
         $winner->type(Connection::WINNER);
         $winner->prize($prize);
-        $prize->winner($winner);
+        $prize->winner($winner->uuid());
 
         $everyone = $this->dispatcher()->connections();
 

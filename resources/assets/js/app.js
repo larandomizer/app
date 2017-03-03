@@ -51,6 +51,18 @@ const app = new Vue({
         Event.listen('ConnectionRegistered', message => {
             this.connection = message.connection;
         });
+        Event.listen('ConnectionAuthenticated', message => {
+            this.connection = message.connection;
+            this.hidePasswordModal();
+            if( this.previous ) {
+                Server.send(this.previous.name, this.previous);
+                this.previous = null;
+            }
+        });
+        Event.listen('PromptForAuthentication', message => {
+            this.displayPasswordModal();
+            this.previous = message.previous;
+        });
         Event.listen('UpdateConnections', message => {
             this.connections = _.values(message.connections);
         });
@@ -67,9 +79,9 @@ const app = new Vue({
             this.uptime = message.elapsed;
         });
         Event.listen('AwardWinner', message => {
-            if (message.uuid === this.connection.uuid) {
-                this.showWinnerPrizeModal();
-            }
+            this.award.name = message.prize.name;
+            this.award.sponsor = message.prize.sponsor;
+            this.displayWinnerPrizeModal();
         });
 
         // Client Commands
@@ -131,6 +143,12 @@ const app = new Vue({
     },
 
     computed: {
+        awardName() {
+            return this.award.name;
+        },
+        awardSponsor() {
+            return this.award.sponsor;
+        },
         uptimeLabel() {
             return _.padStart(Math.floor(this.uptime / 60), 2, '0') + ':' + _.padStart(this.uptime % 60, 2, '0');
         },
@@ -150,6 +168,10 @@ const app = new Vue({
 
     data: {
         password: '',
+        award: {
+            name: null,
+            sponsor: null
+        },
         prize: {
             name: null,
             sponsor: null
@@ -172,6 +194,7 @@ const app = new Vue({
         notifications: [],
         topics: [],
         prizes: [],
+        previous: null,
         menus: {
             connections: [
                 {icon: 'power', event: 'DisconnectSpectators', title: 'Disconnect Spectators'},
@@ -237,6 +260,10 @@ const app = new Vue({
             this.showAddPrizeModal = true;
         },
         sendNewPrize() {
+            Server.send('AddPrize', { prize: {
+                name: this.prize,
+                sponsor: this.sponsor
+            }});
             this.showAddPrizeModal = false;
             this.prize.name = null;
             this.prize.sponsor = null;
@@ -252,11 +279,13 @@ const app = new Vue({
             this.showPasswordModal = true;
         },
         sendAuthentication() {
-            this.password = '';
-            this.showPasswordModal = false;
-            Server.send('Authenicate', {
+            Server.send('Authenticate', {
                 password: this.password
             });
+        },
+        hidePasswordModal() {
+            this.password = '';
+            this.showPasswordModal = false;
         }
     }
 });

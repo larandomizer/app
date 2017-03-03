@@ -24,7 +24,7 @@ class RegisterConnection extends Command
      */
     public function run()
     {
-        $everyone = $this->dispatcher() ->connections();
+        $everyone = $this->dispatcher()->connections();
 
         $connection = $everyone->uuid(array_get($this->connection, 'uuid'));
 

@@ -2,7 +2,6 @@
 
 namespace App\Server\Entities;
 
-use App\Server\Contracts\Connection;
 use App\Server\Contracts\Prize as PrizeInterface;
 use App\Server\Traits\FluentProperties;
 use App\Server\Traits\JsonHelpers;
@@ -81,16 +80,16 @@ class Prize implements PrizeInterface, Arrayable, Jsonable, JsonSerializable
     /**
      * Get or set the winner of the prize.
      *
-     * @example winner() ==> \App\Server\Contract\Connection
-     *          winner($winner) ==> self
+     * @example winner() ==> string
+     *          winner($uuid) ==> self
      *
-     * @param \App\Server\Contracts\Connection $winner
+     * @param string $winner
      *
-     * @return \App\Server\Contracts\Connection|self
+     * @return string|self
      */
-    public function winner(Connection $winner = null)
+    public function winner($uuid = null)
     {
-        return $this->property(__METHOD__, $winner);
+        return $this->property(__METHOD__, $uuid);
     }
 
     /**
@@ -104,7 +103,7 @@ class Prize implements PrizeInterface, Arrayable, Jsonable, JsonSerializable
             'uuid'    => $this->uuid,
             'name'    => $this->name,
             'sponsor' => $this->sponsor,
-            'winner'  => $this->winner ? $this->winner->toArray() : null,
+            'winner'  => $this->winner ? $this->winner : null,
         ]);
     }
 }

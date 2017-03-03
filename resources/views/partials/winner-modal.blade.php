@@ -6,8 +6,8 @@
     <div class="col-9">
       <h5>Congratulations! You Won!</h5>
       <p>
-        How about that? You won a <strong v-text="'Prize Name'"></strong> which
-        was graciously provided by <strong v-text="'Prize Sponsor'"></strong>.
+        How about that? You won a <strong v-text="awardName"></strong> which
+        was graciously provided by <strong v-text="awardSponsor"></strong>.
         Contact the host to claim your prize.
       </p>
     </div>

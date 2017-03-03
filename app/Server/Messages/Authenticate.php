@@ -17,6 +17,7 @@ class Authenticate extends Message implements ClientMessage
      */
     public function __construct(array $arguments = [])
     {
+        parent::__construct($arguments);
         $this->password = array_get($arguments, 'password');
     }
 
@@ -33,6 +34,6 @@ class Authenticate extends Message implements ClientMessage
         $this->client()->admin(true);
 
         return $this->dispatcher()
-            ->send(new Authenticated($this->client()), $this->client());
+            ->send(new ConnectionAuthenticated($this->client()), $this->client());
     }
 }

@@ -14,6 +14,7 @@ class NotifyConnection extends Message
      */
     public function __construct(array $arguments = [])
     {
+        parent::__construct($arguments);
         $this->receiver = array_get($arguments, 'receiver');
         $this->sender = array_get($arguments, 'sender');
     }

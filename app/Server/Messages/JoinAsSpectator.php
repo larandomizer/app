@@ -3,7 +3,6 @@
 namespace App\Server\Messages;
 
 use App\Server\Contracts\Connection;
-use App\Server\Messages\JoinAsType;
 
 class JoinAsSpectator extends JoinAsType
 {

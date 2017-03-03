@@ -2,11 +2,11 @@
 
 namespace App\Server\Messages;
 
-use App\Server\Contracts\Connection;
+use App\Server\Commands\RegisterConnection;
 use App\Server\Contracts\ClientMessage;
+use App\Server\Contracts\Connection;
 use App\Server\Entities\Message;
 use App\Server\Traits\NoProtection;
-use App\Server\Commands\RegisterConnection;
 
 abstract class JoinAsType extends Message implements ClientMessage
 {
@@ -19,6 +19,7 @@ abstract class JoinAsType extends Message implements ClientMessage
      */
     public function __construct(array $arguments = [])
     {
+        parent::__construct($arguments);
         $this->email = array_get($arguments, 'registration.email', 'Not Available');
         $this->first_name = array_get($arguments, 'registration.name.first');
         $this->last_name = array_get($arguments, 'registration.name.last');

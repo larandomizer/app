@@ -3,6 +3,7 @@
 namespace App\Server\Commands;
 
 use App\Server\Entities\Command;
+use App\Server\Entities\Prizes;
 use App\Server\Messages\UpdatePrizes;
 
 class ResetPrizes extends Command
@@ -12,7 +13,7 @@ class ResetPrizes extends Command
      */
     public function run()
     {
-        $this->dispatcher()->prizes([]);
+        $this->dispatcher()->prizes(new Prizes());
 
         $prizes = $this->dispatcher()->prizes();
         $everyone = $this->dispatcher()->connections();
