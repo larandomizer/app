@@ -111,7 +111,7 @@ class Server implements ServerInterface
      */
     public function address($ip4 = null)
     {
-        return $this->property(__METHOD__, $ip4);
+        return $this->property(__FUNCTION__, $ip4);
     }
 
     /**
@@ -126,7 +126,7 @@ class Server implements ServerInterface
      */
     public function port($number = null)
     {
-        return $this->property(__METHOD__, $number);
+        return $this->property(__FUNCTION__, $number);
     }
 
     /**
@@ -264,7 +264,7 @@ class Server implements ServerInterface
             $instance->manager()->broker($instance);
         }
 
-        return $this->property(__METHOD__, $instance);
+        return $this->property(__FUNCTION__, $instance);
     }
 
     /**
@@ -279,7 +279,7 @@ class Server implements ServerInterface
      */
     public function websocket(WsServer $instance = null)
     {
-        return $this->property(__METHOD__, $instance);
+        return $this->property(__FUNCTION__, $instance);
     }
 
     /**
@@ -294,7 +294,7 @@ class Server implements ServerInterface
      */
     public function http(HttpServer $instance = null)
     {
-        return $this->property(__METHOD__, $instance);
+        return $this->property(__FUNCTION__, $instance);
     }
 
     /**
@@ -313,6 +313,6 @@ class Server implements ServerInterface
             $this->broker()->manager()->loop($instance->loop);
         }
 
-        return $this->property(__METHOD__, $instance);
+        return $this->property(__FUNCTION__, $instance);
     }
 }

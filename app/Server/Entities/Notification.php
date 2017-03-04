@@ -41,7 +41,7 @@ class Notification implements NotificationInterface, Arrayable, Jsonable, JsonSe
      */
     public function uuid($uuid = null)
     {
-        return $this->property(__METHOD__, $uuid);
+        return $this->property(__FUNCTION__, $uuid);
     }
 
     /**
@@ -56,7 +56,7 @@ class Notification implements NotificationInterface, Arrayable, Jsonable, JsonSe
      */
     public function sender(Connection $connection = null)
     {
-        return $this->property(__METHOD__, $connection);
+        return $this->property(__FUNCTION__, $connection);
     }
 
     /**

@@ -59,7 +59,7 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
      */
     public function socket(SocketInterface $interface = null)
     {
-        return $this->property(__METHOD__, $interface);
+        return $this->property(__FUNCTION__, $interface);
     }
 
     /**
@@ -74,7 +74,7 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
      */
     public function timestamp(Carbon $timestamp = null)
     {
-        return $this->property(__METHOD__, $timestamp);
+        return $this->property(__FUNCTION__, $timestamp);
     }
 
     /**
@@ -109,7 +109,7 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
      */
     public function uuid($uuid = null)
     {
-        return $this->property(__METHOD__, $uuid);
+        return $this->property(__FUNCTION__, $uuid);
     }
 
     /**
@@ -124,7 +124,7 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
      */
     public function type($type = null)
     {
-        return $this->property(__METHOD__, $type);
+        return $this->property(__FUNCTION__, $type);
     }
 
     /**
@@ -139,7 +139,7 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
      */
     public function email($email = null)
     {
-        return $this->property(__METHOD__, $email);
+        return $this->property(__FUNCTION__, $email);
     }
 
     /**
@@ -154,7 +154,7 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
      */
     public function name($name = null)
     {
-        return $this->property(__METHOD__, $name);
+        return $this->property(__FUNCTION__, $name);
     }
 
     /**
@@ -169,7 +169,7 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
      */
     public function ipAddress($ipAddress = null)
     {
-        return $this->property(__METHOD__, $ipAddress);
+        return $this->property(__FUNCTION__, $ipAddress);
     }
 
     /**
@@ -184,7 +184,7 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
      */
     public function admin($privileged = null)
     {
-        return $this->property(__METHOD__, $privileged);
+        return $this->property(__FUNCTION__, $privileged);
     }
 
     /**
@@ -199,7 +199,7 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
      */
     public function subscriptions(Topics $topics = null)
     {
-        return $this->property(__METHOD__, $topics);
+        return $this->property(__FUNCTION__, $topics);
     }
 
     /**
@@ -242,7 +242,7 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
      */
     public function prize(Prize $prize = null)
     {
-        return $this->property(__METHOD__, $prize);
+        return $this->property(__FUNCTION__, $prize);
     }
 
     /**
@@ -257,7 +257,7 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
      */
     public function notifications(Notifications $notifications = null)
     {
-        return $this->property(__METHOD__, $notifications);
+        return $this->property(__FUNCTION__, $notifications);
     }
 
     /**

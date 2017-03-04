@@ -28,6 +28,8 @@ function connect() {
     }
 }
 
+window.Server = connect();
+
 Vue.component('stat-dropdown-item', require('./components/StatDropdownItem.vue'));
 Vue.component('stat-dropdown', require('./components/StatDropdown.vue'));
 Vue.component('stat', require('./components/Stat.vue'));
@@ -114,19 +116,19 @@ const app = new Vue({
             this.reconnect(connection.uuid);
         });
         Event.listen('ConnectionClosed', err => {
-            this.connected = false;
+            this.reset();
         });
         Event.listen('ConnectionFailed', err => {
-            this.connected = false;
+            this.reset();
         });
         Event.listen('DisconnectPlayers', () => {
-            this.displayPasswordModal();
+            Server.send('DisconnectPlayers');
         });
         Event.listen('DisconnectSpectators', () => {
-            this.displayPasswordModal();
+            Server.send('DisconnectSpectators');
         });
         Event.listen('DisconnectAll', () => {
-            this.displayPasswordModal();
+            Server.send('DisconnectAll');
         });
         Event.listen('RestartServer', () => {
             Server.send('StopServer');
@@ -234,6 +236,9 @@ const app = new Vue({
         },
         disconnect(uuid) {
             Server.close();
+            this.reset();
+        },
+        reset() {
             this.connection = {
                 uuid: '',
                 name: "Anonymous",
@@ -261,8 +266,8 @@ const app = new Vue({
         },
         sendNewPrize() {
             Server.send('AddPrize', { prize: {
-                name: this.prize,
-                sponsor: this.sponsor
+                name: this.prize.name,
+                sponsor: this.prize.sponsor
             }});
             this.showAddPrizeModal = false;
             this.prize.name = null;

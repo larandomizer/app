@@ -34,7 +34,7 @@ abstract class Command extends Fluent implements CommandInterface, ShouldQueue
      */
     public function dispatcher(Manager $instance = null)
     {
-        return $this->property(__METHOD__, $instance);
+        return $this->property(__FUNCTION__, $instance);
     }
 
     /**

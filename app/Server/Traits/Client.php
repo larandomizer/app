@@ -17,6 +17,6 @@ trait Client
      */
     public function client(Connection $connection = null)
     {
-        return $this->property(__METHOD__, $connection);
+        return $this->property(__FUNCTION__, $connection);
     }
 }

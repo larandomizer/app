@@ -48,7 +48,7 @@ class Broker implements BrokerInterface, LoggerInterface, RatchetInterface
      */
     public function manager(Manager $interface = null)
     {
-        return $this->property(__METHOD__, $interface);
+        return $this->property(__FUNCTION__, $interface);
     }
 
     /**
@@ -63,7 +63,7 @@ class Broker implements BrokerInterface, LoggerInterface, RatchetInterface
      */
     public function maxConnections($number = null)
     {
-        return $this->property(snake_case(__METHOD__), $number);
+        return $this->property(snake_case(__FUNCTION__), $number);
     }
 
     /**
@@ -222,7 +222,7 @@ class Broker implements BrokerInterface, LoggerInterface, RatchetInterface
      */
     public function logger(OutputInterface $interface = null)
     {
-        return $this->property(__METHOD__, $interface);
+        return $this->property(__FUNCTION__, $interface);
     }
 
     /**
@@ -237,7 +237,7 @@ class Broker implements BrokerInterface, LoggerInterface, RatchetInterface
      */
     public function logging($enable = null)
     {
-        return $this->property(__METHOD__, $enable);
+        return $this->property(__FUNCTION__, $enable);
     }
 
     /**

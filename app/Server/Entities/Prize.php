@@ -44,7 +44,7 @@ class Prize implements PrizeInterface, Arrayable, Jsonable, JsonSerializable
      */
     public function uuid($uuid = null)
     {
-        return $this->property(__METHOD__, $uuid);
+        return $this->property(__FUNCTION__, $uuid);
     }
 
     /**
@@ -59,7 +59,7 @@ class Prize implements PrizeInterface, Arrayable, Jsonable, JsonSerializable
      */
     public function name($name = null)
     {
-        return $this->property(__METHOD__, $name);
+        return $this->property(__FUNCTION__, $name);
     }
 
     /**
@@ -74,7 +74,7 @@ class Prize implements PrizeInterface, Arrayable, Jsonable, JsonSerializable
      */
     public function sponsor($sponsor = null)
     {
-        return $this->property(__METHOD__, $sponsor);
+        return $this->property(__FUNCTION__, $sponsor);
     }
 
     /**
@@ -89,7 +89,7 @@ class Prize implements PrizeInterface, Arrayable, Jsonable, JsonSerializable
      */
     public function winner($uuid = null)
     {
-        return $this->property(__METHOD__, $uuid);
+        return $this->property(__FUNCTION__, $uuid);
     }
 
     /**
