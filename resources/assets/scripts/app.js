@@ -6,8 +6,10 @@
 
 require('./bootstrap');
 
-window.onbeforeunload = function() {
-    return "Are you sure you want to disconnect?";
+window.onbeforeunload = function(e) {
+    let message = 'Are you sure you want to disconnect?';
+    e.returnValue = message;
+    return message;
 };
 
 window.Server;
