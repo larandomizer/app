@@ -6,7 +6,7 @@
     <title>Larandomizer - @yield('title')</title>
     <meta name="description" content="Larandomizer is a websocket server application written with Laravel and React PHP to give away prizes at meetups and conferences and to teach async in PHP">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:700">
     <link rel="stylesheet" href="{{ mix('css/app.css') }}">
     <script src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
