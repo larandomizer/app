@@ -27,6 +27,7 @@
   @include make-col-ready;
   @include make-col(12);
 
+  font-size: 14px;
   padding-bottom: $grid-gutter-width-base;
   text-align: center;
 
@@ -42,9 +43,6 @@
 }
 
 .footer-links {
-  font-size: 14px;
-  text-align: center;
-
   > .footer-link {
     margin: 0 .5rem;
 
