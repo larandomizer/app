@@ -3,3 +3,12 @@
 [v-cloak] {
   display: none;
 }
+
+.no-wrap {
+  white-space: nowrap;
+  max-width: 100%;
+  display: block;
+  overflow: hidden;
+  position: relative;
+  text-overflow: ellipsis;
+}

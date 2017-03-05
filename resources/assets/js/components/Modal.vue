@@ -26,6 +26,13 @@
                 }
             }
         },
+        mounted() {
+            $(this.$el).modal({
+                backdrop: 'static',
+                keyboard: false,
+                show: false
+            });
+        },
         computed: {
             statusClass() {
                 return this.status ? 'show' : 'hide';

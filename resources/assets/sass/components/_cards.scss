@@ -13,3 +13,19 @@
     padding-bottom: $grid-gutter-width-base;
   }
 }
+
+.content {
+  padding-top: calc(90px + 2rem);
+}
+
+.modal-dialog {
+  margin-top: calc(90px + 2rem);
+}
+
+.modal-content {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header .close {
+  color: #c0c0c0;
+}

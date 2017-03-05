@@ -1,22 +1,24 @@
 <template>
-    <td v-if="id === 'name'" width="250">
-        <span class="d-flex align-content-center">
+    <td v-if="id === 'name'">
+        <span class="d-flex align-content-center no-wrap">
             <i class="mdi mdi-account-circle d-inline-flex pr-2" :class="connectionClass"></i>
             <span class="d-inline-flex">{{ record[id] || 'Anonymous' }}</span>
             <a class="connection-ping" @click="notify" v-show="showNotifier" v-if="!active"><i class="mdi mdi-bell"></i></a>
         </span>
     </td>
-    <td v-else-if="id === 'email'">
+    <td v-else-if="id === 'email'" class="no-wrap">
         <span>{{ record[id] || 'Not available' }}</span>
     </td>
-    <td v-else-if="id === 'timestamp'">
+    <td v-else-if="id === 'timestamp'" width="50">
         <span class="d-flex align-content-center">
-            <i class="mdi mdi-clock d-inline-flex pr-2"></i>
-            <span class="d-inline-flex">{{ ago(record[id]) }}</span>
+            <i class="mdi mdi-clock d-inline-flex pr-2" data-toggle="tooltip" :title="ago(record[id])"></i>
         </span>
     </td>
     <td v-else-if="id === 'type'">
         <span class="badge badge-block" :class="typeClass">{{ record[id] }}</span>
+    </td>
+    <td v-else-if="id === 'uuid'">
+        <span class="no-wrap">{{ record[id] }}</span>
     </td>
     <td v-else>{{ record[id] }}</td>
 </template>
@@ -31,13 +33,6 @@
         'player': 'badge-success',
         'spectator': 'badge-default'
     };
-    let connectionMap = {
-        'winner': 'text-warning',
-        'anonymous': 'text-inverse',
-        'loser': 'text-primary',
-        'player': 'text-primary',
-        'spectator': 'text-info'
-    };
     export default {
         created() {
             Event.listen('grid.row.on', row => {
@@ -49,15 +44,15 @@
                 this.showNotifier = false;
             });
         },
+        mounted() {
+            $('[data-toggle=tooltip]', this.$el).tooltip();
+        },
         computed: {
             typeClass() {
-                return typeMap[this.record.type]
+                return typeMap[this.record.type];
             },
             connectionClass() {
-                if (this.active === true) {
-                    return 'text-primary';
-                }
-                return connectionMap[this.record.type]
+                return this.active === true ? 'text-primary' : 'text-info';
             }
         },
         data() {

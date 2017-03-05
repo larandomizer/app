@@ -17,7 +17,9 @@
     <![endif]-->
     <div id="app" v-cloak>
       @include('partials.nav')
-      @yield('content')
+      <div class="content">
+        @yield('content')
+      </div>
     </div>
     @include('partials.footer')
     <script>

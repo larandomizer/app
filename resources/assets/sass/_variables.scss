@@ -67,3 +67,8 @@ $panel-default-heading-bg: #fff;
 // Cards
 $card-border-color: transparent;
 $card-cap-bg: tranparent;
+
+// Modals
+$modal-backdrop-bg: $body-bg;
+$modal-backdrop-opacity: 0.9;
+$modal-content-border-color: $card-border-color;

@@ -261,6 +261,20 @@ const app = new Vue({
             };
         },
 
+        // Auth Control Methods
+        displayPasswordModal() {
+            this.showPasswordModal = true;
+        },
+        sendAuthentication() {
+            Server.send('Authenticate', {
+                password: this.password
+            });
+        },
+        hidePasswordModal() {
+            this.password = '';
+            this.showPasswordModal = false;
+        },
+
         // Prize Control Methods
         displayAddPrizeModal() {
             this.showAddPrizeModal = true;
@@ -277,21 +291,5 @@ const app = new Vue({
         displayWinnerPrizeModal() {
             this.showWinnerModal = true;
         },
-
-        // Auth Control Methods
-        displayRegisterPrompt() {
-        },
-        displayPasswordModal() {
-            this.showPasswordModal = true;
-        },
-        sendAuthentication() {
-            Server.send('Authenticate', {
-                password: this.password
-            });
-        },
-        hidePasswordModal() {
-            this.password = '';
-            this.showPasswordModal = false;
-        }
     }
 });

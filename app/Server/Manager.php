@@ -79,12 +79,20 @@ class Manager implements ManagerInterface
     {
         $this->start = Carbon::now();
 
-        // $this->loop()->addPeriodicTimer(1, function () {
-        //     $this->broadcast(new CurrentUptime($this->start), $this->connections());
-        // });
+        // Demonstration of a timer where the server keeps time
+        $this->loop()->addPeriodicTimer(1, function () {
+            $this->broadcast(new CurrentUptime($this->start), $this->connections());
+        });
 
+        // Restart server every hour
+        $this->loop()->addPeriodicTimer(3600, function () {
+            $this->stop();
+        });
+
+        // Register a queue worker to process queued messages every 100ms
         $this->run(new AddQueueWorker(['timing' => 1 / 10]));
 
+        // Start the actual loop: starts blocking
         $this->loop()->run();
 
         return $this;

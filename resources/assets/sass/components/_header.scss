@@ -2,8 +2,11 @@
 .header {
   background-color: $navbar-default-bg;
   box-shadow: 0 3px 3px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
   height: 90px;
+  z-index: 1041;
+  position: fixed;
+  top: 0;
+  width: 100%;
 }
 
 .header .container {
