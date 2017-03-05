@@ -3,6 +3,7 @@
 namespace App\Server\Commands;
 
 use App\Server\Entities\Command;
+use App\Server\Entities\Notifications;
 use App\Server\Messages\UpdateNotifications;
 
 class DismissNotifications extends Command
@@ -28,7 +29,7 @@ class DismissNotifications extends Command
             ->connections()
             ->uuid($this->uuid);
 
-        $connection->notifications([]);
+        $connection->notifications(new Notifications());
 
         return $this->dispatcher()
             ->send(new UpdateNotifications($connection->notifications()), $connection);

@@ -5,13 +5,18 @@
   // Notification Count
   &-count {
     background-color: $brand-info;
-    border-radius: 4px;
+    border-radius: 50%;
     color: #fff;
-    font-size: 12px;
-    height: 19px;
-    line-height: 14px;
+    font-size: 11px;
+    height: 18px;
+    min-width: 18px;
+    line-height: 18px;
     padding: 0 .25rem;
     margin-left: -.5rem;
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    display: block;
   }
 
   // Notifications Dropdown Menu
@@ -34,8 +39,13 @@
       border-bottom-color: #f7f7f9;
     }
 
+    > .dropdown-item {
+      padding: 3px 1rem;
+    }
+
     > .dropdown-item:first-child {
       background-color: #f7f7f9;
+      min-height: 38px;
     }
   }
 
@@ -53,12 +63,23 @@
 }
 
 .nav-notifications-list {
-  height: 12rem;
+  max-height: 12rem;
   overflow: auto;
+}
+
+.nav-notification-time {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 // Nav notifications in the header
 .header .navbar-nav .nav-notifications .nav-link {
   margin: 0 !important;
   padding: 0 !important;
+
+  .mdi {
+    position: relative;
+    z-index: 1;
+  }
 }

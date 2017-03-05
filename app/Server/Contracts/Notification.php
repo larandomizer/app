@@ -2,6 +2,8 @@
 
 namespace App\Server\Contracts;
 
+use Carbon\Carbon;
+
 interface Notification
 {
     /**
@@ -19,12 +21,24 @@ interface Notification
     /**
      * Get or set the connection that sent the notification.
      *
-     * @example connection() ==> \App\Server\Contracts\Connection
-     *          connection($connection) ==> self
+     * @example sender() ==> string
+     *          sender($uuid) ==> self
      *
-     * @param \App\Server\Contracts\Connection $connection
+     * @param string $uuid
      *
-     * @return \App\Server\Contracts\Connection|self
+     * @return string|self
      */
-    public function sender(Connection $connection = null);
+    public function sender($uuid = null);
+
+    /**
+     * Get or set the time that the notification was sent.
+     *
+     * @example timestamp() ==> \Carbon\Carbon
+     *          timestamp($timestamp) ==> self
+     *
+     * @param \Carbon\Carbon $timestamp
+     *
+     * @return \Carbon\Carbon|self
+     */
+    public function timestamp(Carbon $timestamp = null);
 }

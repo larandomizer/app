@@ -72,6 +72,7 @@ const app = new Vue({
             this.prizes = _.values(message.prizes);
         });
         Event.listen('UpdateNotifications', message => {
+            console.log(message);
             this.notifications = _.values(message.notifications);
         });
         Event.listen('UpdateTopics', message => {

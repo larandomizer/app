@@ -3,10 +3,14 @@
 namespace App\Server\Messages;
 
 use App\Server\Commands\NotifyConnection as NotifyConnectionCommand;
+use App\Server\Contracts\ClientMessage;
 use App\Server\Entities\Message;
+use App\Server\Traits\NoProtection;
 
-class NotifyConnection extends Message
+class NotifyConnection extends Message implements ClientMessage
 {
+    use NoProtection;
+
     /**
      * Save the command arguments for later when the command is run.
      *
@@ -24,8 +28,10 @@ class NotifyConnection extends Message
      *
      * @return mixed
      */
-    public function run()
+    public function handle()
     {
-        return $this->dispatcher()->run(new NotifyConnectionCommand($this->attributes));
+        return $this->dispatcher()->run(
+            new NotifyConnectionCommand(array_only($this->attributes, ['receiver', 'sender']))
+        );
     }
 }

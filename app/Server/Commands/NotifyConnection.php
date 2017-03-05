@@ -15,6 +15,7 @@ class NotifyConnection extends Command
      */
     public function __construct(array $arguments = [])
     {
+        parent::__construct($arguments);
         $this->receiver = array_get($arguments, 'receiver');
         $this->sender = array_get($arguments, 'sender');
     }
@@ -26,20 +27,16 @@ class NotifyConnection extends Command
      */
     public function run()
     {
-        $sender = $this->dispatcher()
-            ->connections()
-            ->uuid($this->sender);
+        $everyone = $this->dispatcher()
+            ->connections();
 
-        $notification = new Notification($sender);
+        $receiver = $everyone->uuid($this->receiver);
 
-        $receiver = $this->dispatcher()
-            ->connections()
-            ->uuid($this->receiver);
-
-        $receiver->notifications()
-            ->put($notification->sender(), $notification);
+        $notification = new Notification($this->sender);
+        $notifications = $receiver->notifications();
+        $notifications->put($notification->sender(), $notification);
 
         return $this->dispatcher()
-            ->send(new UpdateNotifications($receiver->notifications()), $receiver);
+            ->send(new UpdateNotifications($notifications), $receiver);
     }
 }

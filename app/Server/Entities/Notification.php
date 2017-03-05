@@ -2,10 +2,10 @@
 
 namespace App\Server\Entities;
 
-use App\Server\Contracts\Connection;
 use App\Server\Contracts\Notification as NotificationInterface;
 use App\Server\Traits\FluentProperties;
 use App\Server\Traits\JsonHelpers;
+use Carbon\Carbon;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
 use JsonSerializable;
@@ -16,17 +16,19 @@ class Notification implements NotificationInterface, Arrayable, Jsonable, JsonSe
     use FluentProperties, JsonHelpers;
 
     protected $sender;
+    protected $timestamp;
     protected $uuid;
 
     /**
      * Instantiate the notification with the sender.
      *
-     * @param \App\Server\Contracts\Connection $connection of sender
+     * @param string $sender UUID
      */
-    public function __construct(Connection $connection)
+    public function __construct($sender)
     {
         $this->uuid(Uuid::uuid4()->toString());
-        $this->sender($connection);
+        $this->sender($sender);
+        $this->timestamp(Carbon::now());
     }
 
     /**
@@ -47,16 +49,31 @@ class Notification implements NotificationInterface, Arrayable, Jsonable, JsonSe
     /**
      * Get or set the connection that sent the notification.
      *
-     * @example connection() ==> \App\Server\Contracts\Connection
-     *          connection($connection) ==> self
+     * @example sender() ==> string
+     *          sender($uuid) ==> self
      *
-     * @param \App\Server\Contracts\Connection $connection
+     * @param string $uuid
      *
-     * @return \App\Server\Contracts\Connection|self
+     * @return string|self
      */
-    public function sender(Connection $connection = null)
+    public function sender($uuid = null)
     {
-        return $this->property(__FUNCTION__, $connection);
+        return $this->property(__FUNCTION__, $uuid);
+    }
+
+    /**
+     * Get or set the time that the notification was sent.
+     *
+     * @example timestamp() ==> \Carbon\Carbon
+     *          timestamp($timestamp) ==> self
+     *
+     * @param \Carbon\Carbon $timestamp
+     *
+     * @return \Carbon\Carbon|self
+     */
+    public function timestamp(Carbon $timestamp = null)
+    {
+        return $this->property(__FUNCTION__, $timestamp);
     }
 
     /**
@@ -67,8 +84,9 @@ class Notification implements NotificationInterface, Arrayable, Jsonable, JsonSe
     public function toArray()
     {
         return array_filter([
-            'uuid'   => $this->uuid,
-            'sender' => $this->sender->toArray(),
+            'uuid'      => $this->uuid(),
+            'sender'    => $this->sender(),
+            'timestamp' => $this->timestamp()->timestamp,
         ]);
     }
 }

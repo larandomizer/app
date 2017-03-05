@@ -3,7 +3,7 @@
     <a class="navbar-brand" href="{{ config('app.url') }}">{{ config('app.name') }}</a>
     <div class="navbar-nav navbar-nav-user justify-content-start">
       <user :connection="connection" :connected="connected"></user>
-      <notifications :notifications="notifications" :connected="connected"></notifications>
+      <notifications :connections="connections" :notifications="notifications" :connected="connected"></notifications>
     </div>
     <div class="navbar-nav navbar-nav-connection ml-auto">
       <connection :connection="connection" :connected="connected"></connection>
