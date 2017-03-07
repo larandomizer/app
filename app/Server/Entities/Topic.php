@@ -113,9 +113,9 @@ class Topic implements TopicInterface, Arrayable, Jsonable, JsonSerializable
     public function toArray()
     {
         return array_filter([
-            'uuid'          => $this->uuid,
-            'name'          => $this->name,
-            'subscriptions' => $this->subscriptions->toArray(),
+            'name'          => $this->name(),
+            'subscriptions' => $this->subscriptions()->toArray(),
+            'uuid'          => $this->uuid(),
         ]);
     }
 }

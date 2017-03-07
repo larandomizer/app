@@ -14,6 +14,7 @@ class Prize implements PrizeInterface, Arrayable, Jsonable, JsonSerializable
 {
     use FluentProperties, JsonHelpers;
 
+    protected $awarded = false;
     protected $name;
     protected $sponsor;
     protected $uuid;
@@ -93,6 +94,21 @@ class Prize implements PrizeInterface, Arrayable, Jsonable, JsonSerializable
     }
 
     /**
+     * Get or set the awarded status of the prize.
+     *
+     * @example awarded() ==> bool
+     *          awarded($state) ==> self
+     *
+     * @param bool $state
+     *
+     * @return bool|self
+     */
+    public function awarded($state = null)
+    {
+        return $this->property(__FUNCTION__, $state);
+    }
+
+    /**
      * Get the instance as an array.
      *
      * @return array
@@ -100,10 +116,13 @@ class Prize implements PrizeInterface, Arrayable, Jsonable, JsonSerializable
     public function toArray()
     {
         return array_filter([
-            'uuid'    => $this->uuid,
-            'name'    => $this->name,
-            'sponsor' => $this->sponsor,
-            'winner'  => $this->winner ? $this->winner : null,
-        ]);
+            'awarded' => $this->awarded(),
+            'name'    => $this->name(),
+            'sponsor' => $this->sponsor(),
+            'uuid'    => $this->uuid(),
+            'winner'  => $this->winner() ? $this->winner() : null,
+        ], function ($value) {
+            return ((is_array($value) || is_string($value)) && ! empty($value)) || ! is_null($value);
+        });
     }
 }

@@ -20,6 +20,7 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
 
     protected $admin;
     protected $email;
+    protected $ip_address;
     protected $name;
     protected $notifications;
     protected $prize;
@@ -28,7 +29,6 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
     protected $timestamp;
     protected $type;
     protected $uuid;
-    protected $ipAddress;
 
     /**
      * Inject a Ratchet connection as the proxy of this connection.
@@ -40,11 +40,13 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
         $this->socket($instance);
         $this->timestamp(Carbon::now());
         $this->uuid(Uuid::uuid4()->toString());
-        $this->ipAddress($instance->remoteAddress);
         $this->type(ConnectionInterface::ANONYMOUS);
         $this->notifications(new Notifications());
         $this->subscriptions(new Topics());
         $this->admin(false);
+
+        $header = $instance->WebSocket->request->getHeader('x-forwarded-for');
+        $this->ipAddress($header ? $header->__toString() : $instance->remoteAddress);
     }
 
     /**
@@ -163,13 +165,13 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
      * @example ipAddress() ==> string
      *          ipAddress($name) ==> self
      *
-     * @param string $ipAddress
+     * @param string $ip_address
      *
      * @return string|self
      */
-    public function ipAddress($ipAddress = null)
+    public function ipAddress($ip_address = null)
     {
-        return $this->property(__FUNCTION__, $ipAddress);
+        return $this->property(snake_case(__FUNCTION__), $ip_address);
     }
 
     /**
@@ -268,17 +270,19 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
     public function toArray()
     {
         return array_filter([
-            'uuid'          => $this->uuid,
-            'resource_id'   => $this->socket->resourceId,
-            'type'          => $this->type,
-            'admin'         => $this->admin,
-            'name'          => $this->name,
-            'email'         => $this->email,
-            'notifications' => $this->notifications->toArray(),
-            'subscriptions' => $this->subscriptions->toArray(),
-            'prize'         => $this->prize ? $this->prize->toArray() : null,
-            'ipAddress'     => $this->ipAddress,
-            'timestamp'     => $this->timestamp->timestamp,
-        ]);
+            'admin'         => $this->admin(),
+            'email'         => $this->email(),
+            'ip_address'    => $this->ipAddress(),
+            'name'          => $this->name(),
+            'notifications' => $this->notifications()->toArray(),
+            'prize'         => $this->prize() ? $this->prize()->toArray() : null,
+            'resource_id'   => $this->socket()->resourceId,
+            'subscriptions' => $this->subscriptions()->toArray(),
+            'timestamp'     => $this->timestamp()->timestamp,
+            'type'          => $this->type(),
+            'uuid'          => $this->uuid(),
+        ], function ($value) {
+            return ((is_array($value) || is_string($value)) && ! empty($value)) || ! is_null($value);
+        });
     }
 }

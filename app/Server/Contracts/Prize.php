@@ -51,4 +51,16 @@ interface Prize
      * @return string|self
      */
     public function winner($uuid = null);
+
+    /**
+     * Get or set the awarded status of the prize.
+     *
+     * @example awarded() ==> bool
+     *          awarded($state) ==> self
+     *
+     * @param bool $state
+     *
+     * @return bool|self
+     */
+    public function awarded($state = null);
 }

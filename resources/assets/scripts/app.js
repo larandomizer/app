@@ -161,7 +161,7 @@ const app = new Vue({
             return (this.prizesTotal - this.prizesWon) + ' / ' + this.prizesTotal;
         },
         prizesWon() {
-            return _.filter(this.prizes, prize => !_.isEmpty(prize.winner)).length;
+            return _.filter(this.prizes, prize => prize.awarded === true).length;
         },
         prizesTotal() {
             return this.prizes.length;
@@ -190,7 +190,7 @@ const app = new Vue({
             uuid: '',
             name: "Anonymous",
             email: 'Not Available',
-            ipAddress: '127.0.0.1',
+            ip_address: '127.0.0.1',
             timestamp: 0,
             type: 'anonymous',
             resource_id: ''
@@ -219,7 +219,7 @@ const app = new Vue({
             'name': 'Name',
             'email': 'Email',
             'uuid': 'Connection',
-            //'ipAddress': 'IP Address',
+            'ip_address': 'IP Address',
             'timestamp': 'Time',
             'type': 'Status'
         }

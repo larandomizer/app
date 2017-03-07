@@ -77,7 +77,9 @@ class Manager implements ManagerInterface
      */
     public function start()
     {
+        // Render the start time
         $this->start = Carbon::now();
+        $this->broker()->log('Server started at: '.$this->start->timestamp);
 
         // Demonstration of a timer where the server keeps time
         $this->loop()->addPeriodicTimer(1, function () {
@@ -94,6 +96,7 @@ class Manager implements ManagerInterface
 
         // Start the actual loop: starts blocking
         $this->loop()->run();
+        $this->broker()->log('Server stopped at: '.Carbon::now()->timestamp);
 
         return $this;
     }

@@ -84,9 +84,9 @@ class Notification implements NotificationInterface, Arrayable, Jsonable, JsonSe
     public function toArray()
     {
         return array_filter([
-            'uuid'      => $this->uuid(),
             'sender'    => $this->sender(),
             'timestamp' => $this->timestamp()->timestamp,
+            'uuid'      => $this->uuid(),
         ]);
     }
 }
