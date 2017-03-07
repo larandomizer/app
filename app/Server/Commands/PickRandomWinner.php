@@ -33,6 +33,12 @@ class PickRandomWinner extends Command
 
         $everyone = $this->dispatcher()->connections();
 
+        if ( ! $prizes->available()->count()) {
+            $everyone->types(CONNECTION::PLAYER)->each(function ($connection) {
+                $connection->type(CONNECTION::LOSER);
+            });
+        }
+
         $this->dispatcher()
             ->broadcast(new UpdatePrizes($prizes),$everyone)
             ->broadcast(new UpdateConnections($everyone), $everyone)
