@@ -2,29 +2,34 @@
 
 namespace App\Server;
 
-use App\Server\Commands\AddQueueWorker;
 use App\Server\Contracts\Broker as BrokerInterface;
+use App\Server\Contracts\ClientMessage;
 use App\Server\Contracts\Command;
 use App\Server\Contracts\Connection;
 use App\Server\Contracts\Manager as ManagerInterface;
 use App\Server\Contracts\Message;
+use App\Server\Contracts\Timer;
 use App\Server\Contracts\Topic;
 use App\Server\Entities\Commands;
 use App\Server\Entities\Connections;
 use App\Server\Entities\Prizes;
+use App\Server\Entities\Timers;
 use App\Server\Entities\Topics;
 use App\Server\Messages\ConnectionEstablished;
-use App\Server\Messages\CurrentUptime;
 use App\Server\Messages\PromptForAuthentication;
 use App\Server\Messages\UpdateConnections;
 use App\Server\Messages\UpdatePrizes;
 use App\Server\Messages\UpdateSubscriptions;
 use App\Server\Messages\UpdateTopics;
+use App\Server\Timers\AutoRestartServer;
+use App\Server\Timers\CurrentUptime;
+use App\Server\Timers\QueueWorker;
 use App\Server\Traits\FluentProperties;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Queue\Job;
 use Illuminate\Contracts\Queue\Queue;
+use InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
 use React\EventLoop\LoopInterface as Loop;
 
@@ -41,17 +46,20 @@ class Manager implements ManagerInterface
     protected $prizes;
     protected $queue;
     protected $start;
+    protected $timers;
     protected $topics;
 
     /**
      * Inject and setup the dependencies.
      *
      * @param \App\Server\Entities\Connections $connections
+     * @param \App\Server\Entities\Timers      $timers
      * @param \App\Server\Entities\Prizes      $prizes
      */
-    public function __construct(Connections $connections, Prizes $prizes = null)
+    public function __construct(Connections $connections = null, Timers $timers = null, Prizes $prizes = null)
     {
-        $this->connections($connections);
+        $this->connections($connections ?: new Connections());
+        $this->timers($timers ?: new Timers());
         $this->prizes($prizes ?: new Prizes());
     }
 
@@ -77,22 +85,14 @@ class Manager implements ManagerInterface
      */
     public function start()
     {
-        // Render the start time
+        // Log the start time
         $this->start = Carbon::now();
         $this->broker()->log('Server started at: '.$this->start->timestamp);
 
-        // Demonstration of a timer where the server keeps time
-        $this->loop()->addPeriodicTimer(1, function () {
-            $this->broadcast(new CurrentUptime($this->start));
-        });
-
-        // Restart server every hour
-        $this->loop()->addPeriodicTimer(3600, function () {
-            $this->stop();
-        });
-
-        // Register a queue worker to process queued messages every 100ms
-        $this->run(new AddQueueWorker(['timing' => 1 / 10]));
+        // Register all the timers
+        $this->add(new CurrentUptime($this->start));
+        $this->add(new AutoRestartServer());
+        $this->add(new QueueWorker());
 
         // Start the actual loop: starts blocking
         $this->loop()->run();
@@ -194,10 +194,16 @@ class Manager implements ManagerInterface
      * @param \App\Server\Contracts\Message    $message    payload received
      * @param \App\Server\Contracts\Connection $connection sending the message
      *
+     * @throws \InvalidArgumentException message is not a supported client message
+     *
      * @return self
      */
     public function receive(Message $message, Connection $connection)
     {
+        if ( ! $message instanceof ClientMessage) {
+            throw new InvalidArgumentException(get_class($message).' is not a supported ClientMessage.');
+        }
+
         $message->dispatcher($this);
 
         if ( ! $message->client($connection)->authorize()) {
@@ -342,6 +348,95 @@ class Manager implements ManagerInterface
             $topic->unsubscribe($connection);
             $this->send(new UpdateSubscriptions($connection->subscriptions()), $connection);
         }
+
+        return $this;
+    }
+
+    /**
+     * Get or set the timers available for executing.
+     *
+     * @example timers() ==> \App\Server\Entities\Timers
+     *          timers($timers) ==> self
+     *
+     * @param \App\Server\Entities\Timers $timers
+     *
+     * @return \App\Server\Entities\Timers|self
+     */
+    public function timers(Timers $timers = null)
+    {
+        return $this->property(__FUNCTION__, $timers);
+    }
+
+    /**
+     * Add a timer to the event loop.
+     *
+     * @param \App\Server\Contracts\Timer $timer to add
+     *
+     * @return self
+     */
+    public function add(Timer $timer)
+    {
+        $timer->dispatcher($this);
+
+        $this->timers()->add($timer);
+
+        return $this;
+    }
+
+    /**
+     * Pause a timer in the event loop so that it does not run until resumed.
+     *
+     * @param \App\Server\Contracts\Timer $timer to pause
+     *
+     * @return self
+     */
+    public function pause(Timer $timer)
+    {
+        $timer->pause();
+
+        return $this;
+    }
+
+    /**
+     * Resume a timer in the event loop that was previously paused.
+     *
+     * @param \App\Server\Contracts\Timer $timer to resume
+     *
+     * @return self
+     */
+    public function resume(Timer $timer)
+    {
+        $timer->resume();
+
+        return $this;
+    }
+
+    /**
+     * Add a timer that runs only once after the initial delay.
+     *
+     * @param \App\Server\Contracts\Timer $timer to run once
+     *
+     * @return self
+     */
+    public function once(Timer $timer)
+    {
+        $timer->once();
+
+        $this->add($timer);
+
+        return $this;
+    }
+
+    /**
+     * Cancel a timer in the event loop that is currently active.
+     *
+     * @param \App\Server\Contracts\Timer $timer to cancel
+     *
+     * @return self
+     */
+    public function cancel(Timer $timer)
+    {
+        $this->timers()->remove($timer);
 
         return $this;
     }

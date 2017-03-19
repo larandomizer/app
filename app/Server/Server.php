@@ -5,7 +5,6 @@ namespace App\Server;
 use App\Server\Contracts\Broker as BrokerInterface;
 use App\Server\Contracts\Manager as ManagerInterface;
 use App\Server\Contracts\Server as ServerInterface;
-use App\Server\Entities\Connections;
 use App\Server\Traits\FluentProperties;
 use Illuminate\Contracts\Queue\Queue;
 use Illuminate\Support\Facades\Queue as QueueManager;
@@ -43,7 +42,7 @@ class Server implements ServerInterface
     {
         $server = app(static::class)
             ->uses(config('server'))
-            ->uses(new Broker(new Manager(new Connections())));
+            ->uses(new Broker(new Manager()));
 
         self::$instance = $server
             ->uses(new WsServer($server->broker()))

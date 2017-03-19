@@ -4,6 +4,7 @@ namespace App\Server\Contracts;
 
 use App\Server\Entities\Commands;
 use App\Server\Entities\Connections;
+use App\Server\Entities\Timers;
 use App\Server\Entities\Topics;
 use Exception;
 use Illuminate\Contracts\Queue\Job;
@@ -167,6 +168,63 @@ interface Manager
      * @return self
      */
     public function unsubscribe(Topic $topic, Connection $connection);
+
+    /**
+     * Get or set the timers available for executing.
+     *
+     * @example timers() ==> \App\Server\Entities\Timers
+     *          timers($timers) ==> self
+     *
+     * @param \App\Server\Entities\Timers $timers
+     *
+     * @return \App\Server\Entities\Timers|self
+     */
+    public function timers(Timers $timers = null);
+
+    /**
+     * Add a timer to the event loop.
+     *
+     * @param \App\Server\Contracts\Timer $timer to add
+     *
+     * @return self
+     */
+    public function add(Timer $timer);
+
+    /**
+     * Pause a timer in the event loop so that it does not run until resumed.
+     *
+     * @param \App\Server\Contracts\Timer $timer to pause
+     *
+     * @return self
+     */
+    public function pause(Timer $timer);
+
+    /**
+     * Resume a timer in the event loop that was previously paused.
+     *
+     * @param \App\Server\Contracts\Timer $timer to resume
+     *
+     * @return self
+     */
+    public function resume(Timer $timer);
+
+    /**
+     * Add a timer that runs only once after the initial delay.
+     *
+     * @param \App\Server\Contracts\Timer $timer to run once
+     *
+     * @return self
+     */
+    public function once(Timer $timer);
+
+    /**
+     * Cancel a timer in the event loop that is currently active.
+     *
+     * @param \App\Server\Contracts\Timer $timer to cancel
+     *
+     * @return self
+     */
+    public function cancel(Timer $timer);
 
     /**
      * Get or set the event loop the server runs on.
