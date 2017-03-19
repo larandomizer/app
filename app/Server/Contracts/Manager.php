@@ -71,12 +71,11 @@ interface Manager
      * Broadcast message to multiple connections.
      *
      * @param \App\Server\Contracts\Message    $message
-     * @param \App\Server\Entities\Connections $connections to send to
-     * @param bool                             $silent      output
+     * @param \App\Server\Entities\Connections $connections to send to (defaults to everyone)
      *
      * @return self
      */
-    public function broadcast(Message $message, Connections $connections);
+    public function broadcast(Message $message, Connections $connections = null);
 
     /**
      * Called when a new message is received from an open connection.

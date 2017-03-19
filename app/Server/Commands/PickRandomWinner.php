@@ -40,8 +40,8 @@ class PickRandomWinner extends Command
         }
 
         $this->dispatcher()
-            ->broadcast(new UpdatePrizes($prizes),$everyone)
-            ->broadcast(new UpdateConnections($everyone), $everyone)
+            ->broadcast(new UpdatePrizes($prizes))
+            ->broadcast(new UpdateConnections($everyone))
             ->send(new AwardWinner($prize), $winner);
     }
 }

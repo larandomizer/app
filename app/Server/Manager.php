@@ -83,7 +83,7 @@ class Manager implements ManagerInterface
 
         // Demonstration of a timer where the server keeps time
         $this->loop()->addPeriodicTimer(1, function () {
-            $this->broadcast(new CurrentUptime($this->start), $this->connections());
+            $this->broadcast(new CurrentUptime($this->start));
         });
 
         // Restart server every hour
@@ -122,11 +122,11 @@ class Manager implements ManagerInterface
      */
     public function open(Connection $connection)
     {
-        $this->connections()->put($connection->uuid(), $connection);
+        $this->connections()->add($connection);
 
         $this->send(new ConnectionEstablished($connection), $connection)
             ->send(new UpdatePrizes($this->prizes()), $connection)
-            ->broadcast(new UpdateConnections($this->connections()), $this->connections());
+            ->broadcast(new UpdateConnections($this->connections()));
 
         return $this;
     }
@@ -167,12 +167,16 @@ class Manager implements ManagerInterface
      * Broadcast message to multiple connections.
      *
      * @param \App\Server\Contracts\Message    $message
-     * @param \App\Server\Entities\Connections $connections to send to
+     * @param \App\Server\Entities\Connections $connections to send to (defaults to everyone)
      *
      * @return self
      */
-    public function broadcast(Message $message, Connections $connections)
+    public function broadcast(Message $message, Connections $connections = null)
     {
+        if (is_null($connections)) {
+            $connections = $this->connections();
+        }
+
         $message = $this->prepareMessageForBroker($message);
 
         if ($message->topics()->count()) {
@@ -214,9 +218,9 @@ class Manager implements ManagerInterface
      */
     public function close(Connection $connection)
     {
-        $this->connections()->forget($connection->uuid());
+        $this->connections()->remove($connection);
 
-        $this->broadcast(new UpdateConnections($this->connections()), $this->connections());
+        $this->broadcast(new UpdateConnections($this->connections()));
 
         return $this;
     }
@@ -277,9 +281,9 @@ class Manager implements ManagerInterface
      */
     public function register(Topic $topic)
     {
-        $this->topics()->put($topic->uuid(), $topic);
+        $this->topics()->add($topic);
 
-        $this->broadcast(new UpdateTopics($this->topics()), $this->connections());
+        $this->broadcast(new UpdateTopics($this->topics()));
 
         return $this;
     }
@@ -293,13 +297,13 @@ class Manager implements ManagerInterface
      */
     public function unregister(Topic $topic)
     {
-        $this->topics()->forget($topic->uuid());
+        $this->topics()->remove($topic);
         $topic->subscriptions()->each(function ($connection) {
             $connection->unsubscribe();
         });
         $topic->subscriptions(new Connections());
 
-        $this->broadcast(new UpdateTopics($this->topics()), $this->connections());
+        $this->broadcast(new UpdateTopics($this->topics()));
 
         return $this;
     }
@@ -466,7 +470,7 @@ class Manager implements ManagerInterface
      */
     public function next(Command $command)
     {
-        $this->commands()->push($command);
+        $this->commands()->add($command);
 
         // @todo handle executing this on the next tick
 
@@ -482,7 +486,7 @@ class Manager implements ManagerInterface
      */
     public function abort(Command $command)
     {
-        $this->commands()->pull($command);
+        $this->commands()->remove($command);
 
         return $this;
     }

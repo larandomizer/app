@@ -213,7 +213,7 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
      */
     public function subscribe(Topic $topic)
     {
-        $this->topics()->put($topic->uuid(), $topic);
+        $this->topics()->add($topic);
 
         return $this;
     }
@@ -227,7 +227,7 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
      */
     public function unsubscribe(Topic $topic)
     {
-        $this->topics()->forget($topic->uuid());
+        $this->topics()->remove($topic);
 
         return $this;
     }

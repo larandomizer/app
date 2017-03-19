@@ -26,7 +26,7 @@ class ResetPrizes extends Command
             });
 
         return $this->dispatcher()
-            ->broadcast(new UpdatePrizes($prizes), $everyone)
-            ->broadcast(new UpdateConnections($everyone), $everyone);
+            ->broadcast(new UpdatePrizes($prizes))
+            ->broadcast(new UpdateConnections($everyone));
     }
 }
