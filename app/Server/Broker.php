@@ -51,16 +51,6 @@ class Broker implements BrokerInterface, LoggerInterface, RatchetInterface
     }
 
     /**
-     * Get the maximum connections allowed.
-     *
-     * @return int
-     */
-    protected function maxConnections()
-    {
-        return Server::instance()->config(snake_case(__FUNCTION__));
-    }
-
-    /**
      * Called when a new connection is opened.
      *
      * @param \App\Server\Contracts\Connection $connection being opened
@@ -235,7 +225,7 @@ class Broker implements BrokerInterface, LoggerInterface, RatchetInterface
     }
 
     /**
-     * Log to the output. @todo could use some refactoring.
+     * Log to the output.
      *
      * @param mixed $message that can be cast to a string
      *
@@ -243,6 +233,10 @@ class Broker implements BrokerInterface, LoggerInterface, RatchetInterface
      */
     public function log($message)
     {
+        if ( ! $this->logger()) {
+            return $this;
+        }
+
         if ($message instanceof Exception) {
             $this->logger()->writeln($message->getMessage());
 
@@ -274,6 +268,16 @@ class Broker implements BrokerInterface, LoggerInterface, RatchetInterface
         }
 
         return $this;
+    }
+
+    /**
+     * Get the maximum connections allowed.
+     *
+     * @return int
+     */
+    protected function maxConnections()
+    {
+        return Server::instance()->config(snake_case(__FUNCTION__));
     }
 
     /**
