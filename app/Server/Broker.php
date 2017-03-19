@@ -22,7 +22,6 @@ class Broker implements BrokerInterface, LoggerInterface, RatchetInterface
     protected $logger;
     protected $logging = true;
     protected $manager;
-    protected $max_connections;
 
     /**
      * Inject and setup the dependencies.
@@ -52,18 +51,13 @@ class Broker implements BrokerInterface, LoggerInterface, RatchetInterface
     }
 
     /**
-     * Get or set the maximum number of connections the server allows to connect.
+     * Get the maximum connections allowed.
      *
-     * @example maxConnections() ==> 100
-     *          maxConnections(100) ==> self
-     *
-     * @param int $number of maximium connections allowed to connect
-     *
-     * @return int|self
+     * @return int
      */
-    public function maxConnections($number = null)
+    protected function maxConnections()
     {
-        return $this->property(snake_case(__FUNCTION__), $number);
+        return Server::instance()->config(snake_case(__FUNCTION__));
     }
 
     /**
