@@ -5,6 +5,7 @@ namespace App\Server\Contracts;
 use App\Server\Entities\Commands;
 use App\Server\Entities\Connections;
 use App\Server\Entities\Listeners;
+use App\Server\Entities\Processes;
 use App\Server\Entities\Timers;
 use App\Server\Entities\Topics;
 use Exception;
@@ -340,4 +341,45 @@ interface Manager
      * @return self
      */
     public function silence(Listener $listener);
+
+    /**
+     * Get or set the processes that are running.
+     *
+     * @example processes() ==> \App\Server\Entities\Processes
+     *          processes($processes) ==> self
+     *
+     * @param \App\Server\Entities\Processes $processes
+     *
+     * @return \App\Server\Entities\Processes|self
+     */
+    public function processes(Processes $processes = null);
+
+    /**
+     * Add a process to the processes and begin running it.
+     *
+     * @param \App\Server\Contracts\Process $process to add
+     *
+     * @return self
+     */
+    public function execute(Process $process);
+
+    /**
+     * Stop a process that is running and remove it from the processes.
+     *
+     * @param \App\Server\Contracts\Process $process to terminate
+     *
+     * @return self
+     */
+    public function terminate(Process $process);
+
+    /**
+     * Pipe the output of one process to the input of another process.
+     * Both processes will be added to the processes and started automatically.
+     *
+     * @param \App\Server\Contracts\Process $input  to pipe to output
+     * @param \App\Server\Contracts\Process $output to receive from input pipe
+     *
+     * @return self
+     */
+    public function pipe(Process $input, Process $output);
 }

@@ -8,12 +8,14 @@ use App\Server\Contracts\Connection;
 use App\Server\Contracts\Listener;
 use App\Server\Contracts\Manager as ManagerInterface;
 use App\Server\Contracts\Message;
+use App\Server\Contracts\Process;
 use App\Server\Contracts\SelfHandling;
 use App\Server\Contracts\Timer;
 use App\Server\Contracts\Topic;
 use App\Server\Entities\Commands;
 use App\Server\Entities\Connections;
 use App\Server\Entities\Listeners;
+use App\Server\Entities\Processes;
 use App\Server\Entities\Timers;
 use App\Server\Entities\Topics;
 use App\Server\Listeners\ConnectionPool;
@@ -26,7 +28,6 @@ use App\Server\Messages\UpdateSubscriptions;
 use App\Server\Messages\UpdateTopics;
 use App\Server\Timers\QueueWorker;
 use App\Server\Traits\FluentProperties;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Queue\Job;
 use Illuminate\Contracts\Queue\Queue;
@@ -42,6 +43,7 @@ class Manager implements ManagerInterface
     protected $connector;
     protected $listeners;
     protected $loop;
+    protected $processes;
     protected $queue;
     protected $timers;
     protected $topics;
@@ -55,8 +57,9 @@ class Manager implements ManagerInterface
     {
         // Initialize collections
         $this->connections(new Connections());
-        $this->timers(new Timers());
         $this->listeners(new Listeners());
+        $this->processes(new Processes());
+        $this->timers(new Timers());
 
         // Register all the timers
         $this->add(new QueueWorker());
@@ -77,14 +80,14 @@ class Manager implements ManagerInterface
     public function start()
     {
         // Log the start time
-        $this->broker()->log('Server started at: '.Carbon::now()->timestamp);
+        $this->broker()->log('Server started at: '.time());
 
         // Initialize the initial state
         $this->boot();
 
         // Start the actual loop: starts blocking
         $this->loop()->run();
-        $this->broker()->log('Server stopped at: '.Carbon::now()->timestamp);
+        $this->broker()->log('Server stopped at: '.time());
 
         return $this;
     }
@@ -624,6 +627,83 @@ class Manager implements ManagerInterface
     public function silence(Listener $listener)
     {
         $this->listeners()->remove($listener);
+
+        return $this;
+    }
+
+    /**
+     * Get or set the processes that are running.
+     *
+     * @example processes() ==> \App\Server\Entities\Processes
+     *          processes($processes) ==> self
+     *
+     * @param \App\Server\Entities\Processes $processes
+     *
+     * @return \App\Server\Entities\Processes|self
+     */
+    public function processes(Processes $processes = null)
+    {
+        return $this->property(__FUNCTION__, $processes);
+    }
+
+    /**
+     * Add a process to the processes and begin running it.
+     *
+     * @param \App\Server\Contracts\Process $process to add
+     *
+     * @return self
+     */
+    public function execute(Process $process)
+    {
+        $process->dispatcher($this);
+
+        $this->processes()->add($process);
+
+        $process->start($this->loop());
+
+        return $this;
+    }
+
+    /**
+     * Stop a process that is running and remove it from the processes.
+     *
+     * @param \App\Server\Contracts\Process $process to terminate
+     *
+     * @return self
+     */
+    public function terminate(Process $process)
+    {
+        $process->stop();
+
+        $this->processes()->remove($process);
+
+        return $this;
+    }
+
+    /**
+     * Pipe the output of one process to the input of another process.
+     * Both processes will be added to the processes and started automatically.
+     *
+     * @param \App\Server\Contracts\Process $input  to pipe to output
+     * @param \App\Server\Contracts\Process $output to receive from input pipe
+     *
+     * @return self
+     */
+    public function pipe(Process $input, Process $output)
+    {
+        // Start both processes
+        $this->execute($input)
+            ->execute($output);
+
+        // Cascade the termination of one process to the other
+        $input->on('exit', function ($exitCode, $termSignal) use ($output) {
+            $this->terminate($output);
+        });
+
+        // Pipe process output of one process to process input of the other
+        $input->output()->on('data', function ($chunk) use ($output) {
+            $output->input()->write($chunk);
+        });
 
         return $this;
     }
