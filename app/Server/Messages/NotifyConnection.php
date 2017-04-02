@@ -2,13 +2,11 @@
 
 namespace App\Server\Messages;
 
-use App\Server\Commands\NotifyConnection as NotifyConnectionCommand;
 use App\Server\Contracts\ClientMessage;
-use App\Server\Contracts\SelfHandling;
 use App\Server\Entities\Message;
 use App\Server\Traits\NoProtection;
 
-class NotifyConnection extends Message implements ClientMessage, SelfHandling
+class NotifyConnection extends Message implements ClientMessage
 {
     use NoProtection;
 
@@ -22,17 +20,5 @@ class NotifyConnection extends Message implements ClientMessage, SelfHandling
         parent::__construct($arguments);
         $this->receiver = array_get($arguments, 'receiver');
         $this->sender = array_get($arguments, 'sender');
-    }
-
-    /**
-     * Run the command.
-     *
-     * @return mixed
-     */
-    public function handle()
-    {
-        return $this->dispatcher()->run(
-            new NotifyConnectionCommand(array_only($this->attributes, ['receiver', 'sender']))
-        );
     }
 }

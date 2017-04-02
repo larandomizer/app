@@ -16,6 +16,9 @@ use App\Server\Entities\Connections;
 use App\Server\Entities\Listeners;
 use App\Server\Entities\Timers;
 use App\Server\Entities\Topics;
+use App\Server\Listeners\ConnectionPool;
+use App\Server\Listeners\Notifier;
+use App\Server\Listeners\ServerAdmin;
 use App\Server\Messages\ConnectionEstablished;
 use App\Server\Messages\PromptForAuthentication;
 use App\Server\Messages\UpdateConnections;
@@ -57,6 +60,11 @@ class Manager implements ManagerInterface
 
         // Register all the timers
         $this->add(new QueueWorker());
+
+        // Register all the listeners
+        $this->listener(new ConnectionPool());
+        $this->listener(new Notifier());
+        $this->listener(new ServerAdmin());
 
         return $this;
     }
