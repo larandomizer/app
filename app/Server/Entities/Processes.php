@@ -37,4 +37,28 @@ class Processes extends Collection
 
         return $this;
     }
+
+    /**
+     * Get running processes.
+     *
+     * @return self
+     */
+    public function running()
+    {
+        return $this->filter(function($process){
+            return $process->status() === true;
+        });
+    }
+
+    /**
+     * Get exited processes.
+     *
+     * @return self
+     */
+    public function exited()
+    {
+        return $this->filter(function($process){
+            return $process->status() !== true;
+        });
+    }
 }
