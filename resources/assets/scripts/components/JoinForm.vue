@@ -33,8 +33,8 @@
 <script>
     export default {
         created() {
-            this.registration.name.first = localStorage.getItem('first');
-            this.registration.name.last = localStorage.getItem('last');
+            this.registration.name.first = localStorage.getItem('first_name');
+            this.registration.name.last = localStorage.getItem('last_name');
             this.registration.email = localStorage.getItem('email');
         },
         data() {

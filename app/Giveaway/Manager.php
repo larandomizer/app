@@ -27,8 +27,8 @@ class Manager extends BaseManager
         $this->prizes(new Prizes());
 
         // Register all the timers
-        // $this->add(new CurrentUptime(Carbon::now()));
-        // $this->add(new AutoRestartServer());
+        $this->add(new CurrentUptime(Carbon::now()));
+        $this->add(new AutoRestartServer());
 
         // Register all the listeners
         $this->listener(new Listener());
