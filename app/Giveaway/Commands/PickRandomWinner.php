@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Server\Commands;
+namespace App\Giveaway\Commands;
 
+use App\Giveaway\Messages\AwardWinner;
+use App\Giveaway\Messages\UpdatePrizes;
 use App\Server\Contracts\Connection;
 use App\Server\Entities\Command;
-use App\Server\Messages\AwardWinner;
 use App\Server\Messages\UpdateConnections;
-use App\Server\Messages\UpdatePrizes;
 
 class PickRandomWinner extends Command
 {
@@ -34,14 +34,14 @@ class PickRandomWinner extends Command
         $everyone = $this->dispatcher()->connections();
 
         if ( ! $prizes->available()->count()) {
-            $everyone->types(CONNECTION::PLAYER)->each(function ($connection) {
-                $connection->type(CONNECTION::LOSER);
+            $everyone->types(Connection::PLAYER)->each(function ($connection) {
+                $connection->type(Connection::LOSER);
             });
         }
 
         $this->dispatcher()
-            ->broadcast(new UpdatePrizes($prizes))
             ->broadcast(new UpdateConnections($everyone))
+            ->broadcast(new UpdatePrizes($prizes))
             ->send(new AwardWinner($prize), $winner);
     }
 }

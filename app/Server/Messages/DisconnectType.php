@@ -5,10 +5,11 @@ namespace App\Server\Messages;
 use App\Server\Commands\CloseConnections;
 use App\Server\Contracts\ClientMessage;
 use App\Server\Contracts\Connection;
+use App\Server\Contracts\SelfHandling;
 use App\Server\Entities\Message;
 use App\Server\Traits\AdminProtection;
 
-abstract class DisconnectType extends Message implements ClientMessage
+abstract class DisconnectType extends Message implements ClientMessage, SelfHandling
 {
     use AdminProtection;
 

@@ -5,10 +5,11 @@ namespace App\Server\Messages;
 use App\Server\Commands\RegisterConnection;
 use App\Server\Contracts\ClientMessage;
 use App\Server\Contracts\Connection;
+use App\Server\Contracts\SelfHandling;
 use App\Server\Entities\Message;
 use App\Server\Traits\NoProtection;
 
-abstract class JoinAsType extends Message implements ClientMessage
+abstract class JoinAsType extends Message implements ClientMessage, SelfHandling
 {
     use NoProtection;
 

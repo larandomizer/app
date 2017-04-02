@@ -2,9 +2,10 @@
 
 namespace App\Server\Console;
 
+use App\Giveaway\Manager;
 use App\Server\Server;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Queue as QueueManager;
+use Illuminate\Support\Facades\Queue;
 
 class ServerStart extends Command
 {
@@ -57,8 +58,9 @@ class ServerStart extends Command
     {
         Server::make()
             ->bind($this->option('address'), $this->option('port'))
-            ->uses(QueueManager::connection($this->option('connector')), $this->option('queue'))
+            ->uses(new Manager())
             ->uses($this->getOutput())
+            ->uses(Queue::connection($this->option('connector')), $this->option('queue'))
             ->password($this->option('key'))
             ->maxConnections($this->option('max', 0))
             ->start();

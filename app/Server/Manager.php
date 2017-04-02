@@ -2,27 +2,25 @@
 
 namespace App\Server;
 
-use App\Server\Contracts\Broker as BrokerInterface;
 use App\Server\Contracts\ClientMessage;
 use App\Server\Contracts\Command;
 use App\Server\Contracts\Connection;
+use App\Server\Contracts\Listener;
 use App\Server\Contracts\Manager as ManagerInterface;
 use App\Server\Contracts\Message;
+use App\Server\Contracts\SelfHandling;
 use App\Server\Contracts\Timer;
 use App\Server\Contracts\Topic;
 use App\Server\Entities\Commands;
 use App\Server\Entities\Connections;
-use App\Server\Entities\Prizes;
+use App\Server\Entities\Listeners;
 use App\Server\Entities\Timers;
 use App\Server\Entities\Topics;
 use App\Server\Messages\ConnectionEstablished;
 use App\Server\Messages\PromptForAuthentication;
 use App\Server\Messages\UpdateConnections;
-use App\Server\Messages\UpdatePrizes;
 use App\Server\Messages\UpdateSubscriptions;
 use App\Server\Messages\UpdateTopics;
-use App\Server\Timers\AutoRestartServer;
-use App\Server\Timers\CurrentUptime;
 use App\Server\Timers\QueueWorker;
 use App\Server\Traits\FluentProperties;
 use Carbon\Carbon;
@@ -31,51 +29,36 @@ use Illuminate\Contracts\Queue\Job;
 use Illuminate\Contracts\Queue\Queue;
 use InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
-use React\EventLoop\LoopInterface as Loop;
 
 class Manager implements ManagerInterface
 {
     use FluentProperties;
 
-    protected $broker;
     protected $commands;
     protected $connections;
     protected $connector;
+    protected $listeners;
     protected $loop;
-    protected $password;
-    protected $prizes;
     protected $queue;
-    protected $start;
     protected $timers;
     protected $topics;
 
     /**
-     * Inject and setup the dependencies.
+     * Setup the initial state of the manager when starting.
      *
-     * @param \App\Server\Entities\Connections $connections
-     * @param \App\Server\Entities\Timers      $timers
-     * @param \App\Server\Entities\Prizes      $prizes
+     * @return self
      */
-    public function __construct(Connections $connections = null, Timers $timers = null, Prizes $prizes = null)
+    public function boot()
     {
-        $this->connections($connections ?: new Connections());
-        $this->timers($timers ?: new Timers());
-        $this->prizes($prizes ?: new Prizes());
-    }
+        // Initialize collections
+        $this->connections(new Connections());
+        $this->timers(new Timers());
+        $this->listeners(new Listeners());
 
-    /**
-     * Get or set the password the server accepts for admin commands.
-     *
-     * @example password() ==> 'opensesame'
-     *          password('opensesame') ==> self
-     *
-     * @param string $password
-     *
-     * @return string|self
-     */
-    public function password($password = null)
-    {
-        return $this->property(__FUNCTION__, $password);
+        // Register all the timers
+        $this->add(new QueueWorker());
+
+        return $this;
     }
 
     /**
@@ -86,13 +69,10 @@ class Manager implements ManagerInterface
     public function start()
     {
         // Log the start time
-        $this->start = Carbon::now();
-        $this->broker()->log('Server started at: '.$this->start->timestamp);
+        $this->broker()->log('Server started at: '.Carbon::now()->timestamp);
 
-        // Register all the timers
-        $this->add(new CurrentUptime($this->start));
-        $this->add(new AutoRestartServer());
-        $this->add(new QueueWorker());
+        // Initialize the initial state
+        $this->boot();
 
         // Start the actual loop: starts blocking
         $this->loop()->run();
@@ -125,7 +105,6 @@ class Manager implements ManagerInterface
         $this->connections()->add($connection);
 
         $this->send(new ConnectionEstablished($connection), $connection)
-            ->send(new UpdatePrizes($this->prizes()), $connection)
             ->broadcast(new UpdateConnections($this->connections()));
 
         return $this;
@@ -141,7 +120,7 @@ class Manager implements ManagerInterface
      */
     public function send(Message $message, Connection $connection)
     {
-        $message = $this->prepareMessageForBroker($message);
+        $message = $this->prepareMessage($message);
 
         $this->broker()->send($message, $connection);
 
@@ -177,7 +156,7 @@ class Manager implements ManagerInterface
             $connections = $this->connections();
         }
 
-        $message = $this->prepareMessageForBroker($message);
+        $message = $this->prepareMessage($message);
 
         if ($message->topics()->count()) {
             $connections = $connections->topics($message->topics());
@@ -210,7 +189,11 @@ class Manager implements ManagerInterface
             return $this->send(new PromptForAuthentication($message), $connection);
         }
 
-        $message->handle();
+        if ($message instanceof SelfHandling) {
+            $message->handle();
+        }
+
+        $this->listeners->handle($message);
 
         return $this;
     }
@@ -442,33 +425,23 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * Get or set the event loop the server runs on.
+     * Get the event loop the server runs on.
      *
-     * @example loop() ==> \React\EventLoop\LoopInterface
-     *          loop($instance) ==> self
-     *
-     * @param \React\EventLoop\LoopInterface $instance
-     *
-     * @return \React\EventLoop\LoopInterface|self
+     * @return \React\EventLoop\LoopInterface
      */
-    public function loop(Loop $instance = null)
+    public function loop()
     {
-        return $this->property(__FUNCTION__, $instance);
+        return Server::instance()->loop();
     }
 
     /**
-     * Get or set the broker that communicates with the server.
+     * Get the broker that communicates with the server.
      *
-     * @example broker() ==> \App\Server\Contracts\Broker
-     *          broker($instance) ==> self
-     *
-     * @param \App\Server\Contracts\Broker $instance
-     *
-     * @return \App\Server\Contracts\Broker|self
+     * @return \App\Server\Contracts\Broker
      */
-    public function broker(BrokerInterface $instance = null)
+    public function broker()
     {
-        return $this->property(__FUNCTION__, $instance);
+        return Server::instance()->broker();
     }
 
     /**
@@ -587,18 +560,64 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * Get or set the prizes available on the server.
+     * Get or set the listeners that are registered.
      *
-     * @example prizes() ==> \App\Server\Entities\Prizes
-     *          prizes($prizes) ==> self
+     * @example listeners() ==> \App\Server\Entities\Listeners
+     *          listeners($listeners) ==> self
      *
-     * @param \App\Server\Entities\Prizes $prizes
+     * @param \App\Server\Entities\Listeners $listeners
      *
-     * @return \App\Server\Entities\Prizes|self
+     * @return \App\Server\Entities\Listeners|self
      */
-    public function prizes(Prizes $prizes = null)
+    public function listeners(Listeners $listeners = null)
     {
-        return $this->property(__FUNCTION__, $prizes);
+        return $this->property(__FUNCTION__, $listeners);
+    }
+
+    /**
+     * Bind a message to a command so that the command listens for
+     * the message as an event and is ran when the event occurs.
+     *
+     * @param \App\Server\Contracts\Message $message to listen for
+     * @param \App\Server\Contracts\Command $command to run
+     *
+     * @return self
+     */
+    public function listen(Message $message, Command $command)
+    {
+        $listener = Listener::make()
+            ->dispatcher($this)
+            ->register($message, $command);
+
+        return $this->listener($listener);
+    }
+
+    /**
+     * Add a listener to the collection of listeners.
+     *
+     * @param \App\Server\Contracts\Listener $listener to add
+     *
+     * @return self
+     */
+    public function listener(Listener $listener)
+    {
+        $this->listeners()->add($listener->dispatcher($this));
+
+        return $this;
+    }
+
+    /**
+     * Remove a listener from the collection of listeners.
+     *
+     * @param \App\Server\Contracts\Listener $listener to remove
+     *
+     * @return self
+     */
+    public function silence(Listener $listener)
+    {
+        $this->listeners()->remove($listener);
+
+        return $this;
     }
 
     /**
@@ -608,7 +627,7 @@ class Manager implements ManagerInterface
      *
      * @return \App\Server\Contracts\Message
      */
-    protected function prepareMessageForBroker(Message $message)
+    protected function prepareMessage(Message $message)
     {
         return $message->id(Uuid::uuid4()->toString())
             ->name(class_basename($message))

@@ -3,10 +3,12 @@
 namespace App\Server\Messages;
 
 use App\Server\Contracts\ClientMessage;
+use App\Server\Contracts\SelfHandling;
 use App\Server\Entities\Message;
+use App\Server\Server;
 use App\Server\Traits\NoProtection;
 
-class Authenticate extends Message implements ClientMessage
+class Authenticate extends Message implements ClientMessage, SelfHandling
 {
     use NoProtection;
 
@@ -26,7 +28,7 @@ class Authenticate extends Message implements ClientMessage
      */
     public function handle()
     {
-        if ($this->dispatcher()->password() !== $this->password) {
+        if (Server::instance()->password() !== $this->password) {
             return $this->dispatcher()
                 ->send(new PromptForAuthentication($this), $this->client());
         }

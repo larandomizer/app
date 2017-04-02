@@ -4,26 +4,21 @@ namespace App\Server\Contracts;
 
 use App\Server\Entities\Commands;
 use App\Server\Entities\Connections;
+use App\Server\Entities\Listeners;
 use App\Server\Entities\Timers;
 use App\Server\Entities\Topics;
 use Exception;
 use Illuminate\Contracts\Queue\Job;
 use Illuminate\Contracts\Queue\Queue;
-use React\EventLoop\LoopInterface as Loop;
 
 interface Manager
 {
     /**
-     * Get or set the password the server accepts for admin commands.
+     * Setup the initial state of the manager when starting.
      *
-     * @example password() ==> 'opensesame'
-     *          password('opensesame') ==> self
-     *
-     * @param string $password
-     *
-     * @return string|self
+     * @return self
      */
-    public function password($password = null);
+    public function boot();
 
     /**
      * Called when the server is started.
@@ -227,28 +222,11 @@ interface Manager
     public function cancel(Timer $timer);
 
     /**
-     * Get or set the event loop the server runs on.
+     * Get the event loop the server runs on.
      *
-     * @example loop() ==> \React\EventLoop\LoopInterface
-     *          loop($instance) ==> self
-     *
-     * @param \React\EventLoop\LoopInterface $instance
-     *
-     * @return \React\EventLoop\LoopInterface|self
+     * @return \React\EventLoop\LoopInterface
      */
-    public function loop(Loop $instance = null);
-
-    /**
-     * Get or set the broker that communicates with the server.
-     *
-     * @example broker() ==> \App\Server\Contracts\Broker
-     *          broker($instance) ==> self
-     *
-     * @param \App\Server\Contracts\Broker $instance
-     *
-     * @return \App\Server\Contracts\Broker|self
-     */
-    public function broker(Broker $instance = null);
+    public function loop();
 
     /**
      * Get or set the queue connector the server uses.
@@ -321,4 +299,45 @@ interface Manager
      * @return self
      */
     public function abort(Command $command);
+
+    /**
+     * Get or set the listeners that are registered.
+     *
+     * @example listeners() ==> \App\Server\Entities\Listeners
+     *          listeners($listeners) ==> self
+     *
+     * @param \App\Server\Entities\Listeners $listeners
+     *
+     * @return \App\Server\Entities\Listeners|self
+     */
+    public function listeners(Listeners $listeners = null);
+
+    /**
+     * Bind a message to a command so that the command listens for
+     * the message as an event and is ran when the event occurs.
+     *
+     * @param \App\Server\Contracts\Message $message to listen for
+     * @param \App\Server\Contracts\Command $command to run
+     *
+     * @return self
+     */
+    public function listen(Message $message, Command $command);
+
+    /**
+     * Add a listener to the collection of listeners.
+     *
+     * @param \App\Server\Contracts\Listener $listener to add
+     *
+     * @return self
+     */
+    public function listener(Listener $listener);
+
+    /**
+     * Remove a listener from the collection of listeners.
+     *
+     * @param \App\Server\Contracts\Listener $listener to remove
+     *
+     * @return self
+     */
+    public function silence(Listener $listener);
 }

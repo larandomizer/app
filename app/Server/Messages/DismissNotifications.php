@@ -4,10 +4,11 @@ namespace App\Server\Messages;
 
 use App\Server\Commands\DismissNotifications as DismissNotificationsCommand;
 use App\Server\Contracts\ClientMessage;
+use App\Server\Contracts\SelfHandling;
 use App\Server\Entities\Message;
 use App\Server\Traits\ClientProtection;
 
-class DismissNotifications extends Message implements ClientMessage
+class DismissNotifications extends Message implements ClientMessage, SelfHandling
 {
     use ClientProtection;
 

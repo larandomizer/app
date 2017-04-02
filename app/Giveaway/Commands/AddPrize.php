@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Server\Commands;
+namespace App\Giveaway\Commands;
 
+use App\Giveaway\Entities\Prize;
+use App\Giveaway\Messages\UpdatePrizes;
 use App\Server\Entities\Command;
-use App\Server\Entities\Prize;
-use App\Server\Messages\UpdatePrizes;
 
 class AddPrize extends Command
 {

@@ -24,7 +24,6 @@ class Server implements ServerInterface
     protected $config = [];
     protected $connector;
     protected $http;
-    protected $loop;
     protected $manager;
     protected $output;
     protected $port = 8080;
@@ -42,7 +41,8 @@ class Server implements ServerInterface
     {
         $server = app(static::class)
             ->uses(config('server'))
-            ->uses(new Broker(new Manager()));
+            ->uses(new Manager())
+            ->uses(new Broker());
 
         self::$instance = $server
             ->uses(new WsServer($server->broker()))
@@ -360,10 +360,6 @@ class Server implements ServerInterface
      */
     public function manager(ManagerInterface $instance = null)
     {
-        if ( ! is_null($instance)) {
-            $this->broker()->manager($instance);
-        }
-
         return $this->property(__FUNCTION__, $instance);
     }
 
@@ -379,14 +375,7 @@ class Server implements ServerInterface
      */
     public function broker(BrokerInterface $instance = null)
     {
-        $response = $this->property(__FUNCTION__, $instance);
-
-        if ( ! is_null($instance)) {
-            $this->manager($instance->manager());
-            $this->manager()->broker($instance);
-        }
-
-        return $response;
+        return $this->property(__FUNCTION__, $instance);
     }
 
     /**
@@ -431,10 +420,6 @@ class Server implements ServerInterface
      */
     public function socket(IoServer $instance = null)
     {
-        if ( ! is_null($instance)) {
-            $this->manager()->loop($instance->loop);
-        }
-
         return $this->property(__FUNCTION__, $instance);
     }
 
@@ -452,10 +437,11 @@ class Server implements ServerInterface
     {
         if ( ! is_null($instance)) {
             $this->socket()->loop = $instance;
-            $this->manager()->loop($instance);
+
+            return $this;
         }
 
-        return $this->property(__FUNCTION__, $instance);
+        return $this->socket()->loop;
     }
 
     /**

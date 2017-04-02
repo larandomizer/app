@@ -2,8 +2,8 @@
 
 namespace App\Server\Entities;
 
+use App\Giveaway\Entities\Prize;
 use App\Server\Contracts\Connection as ConnectionInterface;
-use App\Server\Contracts\Prize;
 use App\Server\Contracts\Topic;
 use App\Server\Traits\FluentProperties;
 use App\Server\Traits\JsonHelpers;
@@ -233,21 +233,6 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
     }
 
     /**
-     * Get or set the prize the connection won.
-     *
-     * @example prize() ==> \App\Server\Contracts\Prize
-     *          prize($prize) ==> self
-     *
-     * @param \App\Server\Contracts\Prize $prize
-     *
-     * @return \App\Server\Contracts\Prize|self
-     */
-    public function prize(Prize $prize = null)
-    {
-        return $this->property(__FUNCTION__, $prize);
-    }
-
-    /**
      * Get or set the notifications collection for the connection.
      *
      * @example notifications() ==> \App\Server\Entities\Notifications
@@ -260,6 +245,21 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
     public function notifications(Notifications $notifications = null)
     {
         return $this->property(__FUNCTION__, $notifications);
+    }
+
+    /**
+     * Get or set the prize the connection won.
+     *
+     * @example prize() ==> \App\Giveaway\Contracts\Prize
+     *          prize($prize) ==> self
+     *
+     * @param \App\Giveaway\Contracts\Prize $prize
+     *
+     * @return \App\Giveaway\Contracts\Prize|self
+     */
+    public function prize(Prize $prize = null)
+    {
+        return $this->property(__FUNCTION__, $prize);
     }
 
     /**

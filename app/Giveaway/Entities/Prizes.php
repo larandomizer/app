@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Server\Entities;
+namespace App\Giveaway\Entities;
 
 use App\Server\Traits\UUIDFilter;
 use Illuminate\Support\Collection;

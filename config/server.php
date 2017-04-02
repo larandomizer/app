@@ -51,4 +51,20 @@ return [
 
     'max_connections' => env('SERVER_MAX_CONNECTIONS'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Message Namespaces
+    |--------------------------------------------------------------------------
+    |
+    | The class namespaces that a message can resolve to. Remember to keep the
+    | first order in the order you want the paths to be resolved as the first
+    | namespace that has a corresponding class will be resolved.
+    |
+    */
+
+    'namespaces' => [
+        'App\\Server\\Messages\\',
+        'App\\Giveaway\\Messages\\',
+    ],
+
 ];
