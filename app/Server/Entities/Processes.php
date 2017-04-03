@@ -45,7 +45,7 @@ class Processes extends Collection
      */
     public function running()
     {
-        return $this->filter(function($process){
+        return $this->filter(function ($process) {
             return $process->status() === true;
         });
     }
@@ -57,7 +57,7 @@ class Processes extends Collection
      */
     public function exited()
     {
-        return $this->filter(function($process){
+        return $this->filter(function ($process) {
             return $process->status() !== true;
         });
     }
