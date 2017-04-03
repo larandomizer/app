@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Server\Commands;
+namespace App\Giveaway\Commands;
 
+use App\Giveaway\Entities\Prize;
+use App\Giveaway\Messages\UpdatePrizes;
 use App\Server\Entities\Command;
-use App\Server\Entities\Prize;
-use App\Server\Messages\UpdatePrizes;
 
 class AddPrize extends Command
 {
@@ -25,9 +25,8 @@ class AddPrize extends Command
     {
         $prizes = $this->dispatcher()->prizes();
         $prizes->push(new Prize(array_get($this->prize, 'name'), array_get($this->prize, 'sponsor')));
-        $everyone = $this->dispatcher()->connections();
 
         return $this->dispatcher()
-            ->broadcast(new UpdatePrizes($prizes), $everyone);
+            ->broadcast(new UpdatePrizes($prizes));
     }
 }

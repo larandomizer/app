@@ -9,12 +9,4 @@ use App\Server\Traits\AdminProtection;
 class StopServer extends Message implements ClientMessage
 {
     use AdminProtection;
-
-    /**
-     * Handle the message.
-     */
-    public function handle()
-    {
-        return $this->dispatcher()->stop();
-    }
 }

@@ -10,7 +10,8 @@
         "laravel/framework": "5.4.*",
         "laravel/tinker": "~1.0",
         "pda/pheanstalk": "~3.0",
-        "ramsey/uuid": "^3.5"
+        "ramsey/uuid": "^3.5",
+        "react/child-process": "^0.4.3"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "2.0.0-alpha",

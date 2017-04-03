@@ -2,9 +2,9 @@
 
 namespace App\Http\Apis;
 
-use App\Server\Commands\AddPrize;
-use App\Server\Commands\PickRandomWinner;
-use App\Server\Commands\ResetPrizes;
+use App\Giveaway\Commands\AddPrize;
+use App\Giveaway\Commands\PickRandomWinner;
+use App\Giveaway\Commands\ResetPrizes;
 use App\Server\Traits\WebsocketQueue;
 
 class Prize extends Api

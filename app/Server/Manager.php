@@ -2,72 +2,74 @@
 
 namespace App\Server;
 
-use App\Server\Commands\AddQueueWorker;
-use App\Server\Contracts\Broker as BrokerInterface;
+use App\Server\Contracts\ClientMessage;
 use App\Server\Contracts\Command;
 use App\Server\Contracts\Connection;
+use App\Server\Contracts\Listener;
 use App\Server\Contracts\Manager as ManagerInterface;
 use App\Server\Contracts\Message;
+use App\Server\Contracts\Process;
+use App\Server\Contracts\SelfHandling;
+use App\Server\Contracts\Timer;
 use App\Server\Contracts\Topic;
 use App\Server\Entities\Commands;
 use App\Server\Entities\Connections;
-use App\Server\Entities\Prizes;
+use App\Server\Entities\Listeners;
+use App\Server\Entities\Processes;
+use App\Server\Entities\Timers;
 use App\Server\Entities\Topics;
+use App\Server\Listeners\ConnectionPool;
+use App\Server\Listeners\Notifier;
+use App\Server\Listeners\ServerAdmin;
 use App\Server\Messages\ConnectionEstablished;
-use App\Server\Messages\CurrentUptime;
 use App\Server\Messages\PromptForAuthentication;
 use App\Server\Messages\UpdateConnections;
-use App\Server\Messages\UpdatePrizes;
 use App\Server\Messages\UpdateSubscriptions;
 use App\Server\Messages\UpdateTopics;
+use App\Server\Timers\QueueWorker;
 use App\Server\Traits\FluentProperties;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Queue\Job;
 use Illuminate\Contracts\Queue\Queue;
+use InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
-use React\EventLoop\LoopInterface as Loop;
 
 class Manager implements ManagerInterface
 {
     use FluentProperties;
 
-    protected $broker;
     protected $commands;
     protected $connections;
     protected $connector;
+    protected $listeners;
     protected $loop;
-    protected $password;
-    protected $prizes;
+    protected $processes;
     protected $queue;
-    protected $start;
+    protected $timers;
     protected $topics;
 
     /**
-     * Inject and setup the dependencies.
+     * Setup the initial state of the manager when starting.
      *
-     * @param \App\Server\Entities\Connections $connections
-     * @param \App\Server\Entities\Prizes      $prizes
+     * @return self
      */
-    public function __construct(Connections $connections, Prizes $prizes = null)
+    public function boot()
     {
-        $this->connections($connections);
-        $this->prizes($prizes ?: new Prizes());
-    }
+        // Initialize collections
+        $this->connections(new Connections());
+        $this->listeners(new Listeners());
+        $this->processes(new Processes());
+        $this->timers(new Timers());
 
-    /**
-     * Get or set the password the server accepts for admin commands.
-     *
-     * @example password() ==> 'opensesame'
-     *          password('opensesame') ==> self
-     *
-     * @param string $password
-     *
-     * @return string|self
-     */
-    public function password($password = null)
-    {
-        return $this->property(__FUNCTION__, $password);
+        // Register all the timers
+        $this->add(new QueueWorker());
+
+        // Register all the listeners
+        $this->listener(new ConnectionPool());
+        $this->listener(new Notifier());
+        $this->listener(new ServerAdmin());
+
+        return $this;
     }
 
     /**
@@ -77,26 +79,15 @@ class Manager implements ManagerInterface
      */
     public function start()
     {
-        // Render the start time
-        $this->start = Carbon::now();
-        $this->broker()->log('Server started at: '.$this->start->timestamp);
+        // Log the start time
+        $this->broker()->log('Server started at: '.time());
 
-        // Demonstration of a timer where the server keeps time
-        $this->loop()->addPeriodicTimer(1, function () {
-            $this->broadcast(new CurrentUptime($this->start), $this->connections());
-        });
-
-        // Restart server every hour
-        $this->loop()->addPeriodicTimer(3600, function () {
-            $this->stop();
-        });
-
-        // Register a queue worker to process queued messages every 100ms
-        $this->run(new AddQueueWorker(['timing' => 1 / 10]));
+        // Initialize the initial state
+        $this->boot();
 
         // Start the actual loop: starts blocking
         $this->loop()->run();
-        $this->broker()->log('Server stopped at: '.Carbon::now()->timestamp);
+        $this->broker()->log('Server stopped at: '.time());
 
         return $this;
     }
@@ -122,11 +113,10 @@ class Manager implements ManagerInterface
      */
     public function open(Connection $connection)
     {
-        $this->connections()->put($connection->uuid(), $connection);
+        $this->connections()->add($connection);
 
         $this->send(new ConnectionEstablished($connection), $connection)
-            ->send(new UpdatePrizes($this->prizes()), $connection)
-            ->broadcast(new UpdateConnections($this->connections()), $this->connections());
+            ->broadcast(new UpdateConnections($this->connections()));
 
         return $this;
     }
@@ -141,7 +131,7 @@ class Manager implements ManagerInterface
      */
     public function send(Message $message, Connection $connection)
     {
-        $message = $this->prepareMessageForBroker($message);
+        $message = $this->prepareMessage($message);
 
         $this->broker()->send($message, $connection);
 
@@ -167,13 +157,17 @@ class Manager implements ManagerInterface
      * Broadcast message to multiple connections.
      *
      * @param \App\Server\Contracts\Message    $message
-     * @param \App\Server\Entities\Connections $connections to send to
+     * @param \App\Server\Entities\Connections $connections to send to (defaults to everyone)
      *
      * @return self
      */
-    public function broadcast(Message $message, Connections $connections)
+    public function broadcast(Message $message, Connections $connections = null)
     {
-        $message = $this->prepareMessageForBroker($message);
+        if (is_null($connections)) {
+            $connections = $this->connections();
+        }
+
+        $message = $this->prepareMessage($message);
 
         if ($message->topics()->count()) {
             $connections = $connections->topics($message->topics());
@@ -190,17 +184,27 @@ class Manager implements ManagerInterface
      * @param \App\Server\Contracts\Message    $message    payload received
      * @param \App\Server\Contracts\Connection $connection sending the message
      *
+     * @throws \InvalidArgumentException message is not a supported client message
+     *
      * @return self
      */
     public function receive(Message $message, Connection $connection)
     {
+        if ( ! $message instanceof ClientMessage) {
+            throw new InvalidArgumentException(get_class($message).' is not a supported ClientMessage.');
+        }
+
         $message->dispatcher($this);
 
         if ( ! $message->client($connection)->authorize()) {
             return $this->send(new PromptForAuthentication($message), $connection);
         }
 
-        $message->handle();
+        if ($message instanceof SelfHandling) {
+            $message->handle();
+        }
+
+        $this->listeners->handle($message);
 
         return $this;
     }
@@ -214,9 +218,9 @@ class Manager implements ManagerInterface
      */
     public function close(Connection $connection)
     {
-        $this->connections()->forget($connection->uuid());
+        $this->connections()->remove($connection);
 
-        $this->broadcast(new UpdateConnections($this->connections()), $this->connections());
+        $this->broadcast(new UpdateConnections($this->connections()));
 
         return $this;
     }
@@ -277,9 +281,9 @@ class Manager implements ManagerInterface
      */
     public function register(Topic $topic)
     {
-        $this->topics()->put($topic->uuid(), $topic);
+        $this->topics()->add($topic);
 
-        $this->broadcast(new UpdateTopics($this->topics()), $this->connections());
+        $this->broadcast(new UpdateTopics($this->topics()));
 
         return $this;
     }
@@ -293,13 +297,13 @@ class Manager implements ManagerInterface
      */
     public function unregister(Topic $topic)
     {
-        $this->topics()->forget($topic->uuid());
+        $this->topics()->remove($topic);
         $topic->subscriptions()->each(function ($connection) {
             $connection->unsubscribe();
         });
         $topic->subscriptions(new Connections());
 
-        $this->broadcast(new UpdateTopics($this->topics()), $this->connections());
+        $this->broadcast(new UpdateTopics($this->topics()));
 
         return $this;
     }
@@ -343,33 +347,112 @@ class Manager implements ManagerInterface
     }
 
     /**
-     * Get or set the event loop the server runs on.
+     * Get or set the timers available for executing.
      *
-     * @example loop() ==> \React\EventLoop\LoopInterface
-     *          loop($instance) ==> self
+     * @example timers() ==> \App\Server\Entities\Timers
+     *          timers($timers) ==> self
      *
-     * @param \React\EventLoop\LoopInterface $instance
+     * @param \App\Server\Entities\Timers $timers
      *
-     * @return \React\EventLoop\LoopInterface|self
+     * @return \App\Server\Entities\Timers|self
      */
-    public function loop(Loop $instance = null)
+    public function timers(Timers $timers = null)
     {
-        return $this->property(__FUNCTION__, $instance);
+        return $this->property(__FUNCTION__, $timers);
     }
 
     /**
-     * Get or set the broker that communicates with the server.
+     * Add a timer to the event loop.
      *
-     * @example broker() ==> \App\Server\Contracts\Broker
-     *          broker($instance) ==> self
+     * @param \App\Server\Contracts\Timer $timer to add
      *
-     * @param \App\Server\Contracts\Broker $instance
-     *
-     * @return \App\Server\Contracts\Broker|self
+     * @return self
      */
-    public function broker(BrokerInterface $instance = null)
+    public function add(Timer $timer)
     {
-        return $this->property(__FUNCTION__, $instance);
+        $timer->dispatcher($this);
+
+        $this->timers()->add($timer);
+
+        return $this;
+    }
+
+    /**
+     * Pause a timer in the event loop so that it does not run until resumed.
+     *
+     * @param \App\Server\Contracts\Timer $timer to pause
+     *
+     * @return self
+     */
+    public function pause(Timer $timer)
+    {
+        $timer->pause();
+
+        return $this;
+    }
+
+    /**
+     * Resume a timer in the event loop that was previously paused.
+     *
+     * @param \App\Server\Contracts\Timer $timer to resume
+     *
+     * @return self
+     */
+    public function resume(Timer $timer)
+    {
+        $timer->resume();
+
+        return $this;
+    }
+
+    /**
+     * Add a timer that runs only once after the initial delay.
+     *
+     * @param \App\Server\Contracts\Timer $timer to run once
+     *
+     * @return self
+     */
+    public function once(Timer $timer)
+    {
+        $timer->once();
+
+        $this->add($timer);
+
+        return $this;
+    }
+
+    /**
+     * Cancel a timer in the event loop that is currently active.
+     *
+     * @param \App\Server\Contracts\Timer $timer to cancel
+     *
+     * @return self
+     */
+    public function cancel(Timer $timer)
+    {
+        $this->timers()->remove($timer);
+
+        return $this;
+    }
+
+    /**
+     * Get the event loop the server runs on.
+     *
+     * @return \React\EventLoop\LoopInterface
+     */
+    public function loop()
+    {
+        return Server::instance()->loop();
+    }
+
+    /**
+     * Get the broker that communicates with the server.
+     *
+     * @return \App\Server\Contracts\Broker
+     */
+    public function broker()
+    {
+        return Server::instance()->broker();
     }
 
     /**
@@ -466,7 +549,7 @@ class Manager implements ManagerInterface
      */
     public function next(Command $command)
     {
-        $this->commands()->push($command);
+        $this->commands()->add($command);
 
         // @todo handle executing this on the next tick
 
@@ -482,24 +565,147 @@ class Manager implements ManagerInterface
      */
     public function abort(Command $command)
     {
-        $this->commands()->pull($command);
+        $this->commands()->remove($command);
 
         return $this;
     }
 
     /**
-     * Get or set the prizes available on the server.
+     * Get or set the listeners that are registered.
      *
-     * @example prizes() ==> \App\Server\Entities\Prizes
-     *          prizes($prizes) ==> self
+     * @example listeners() ==> \App\Server\Entities\Listeners
+     *          listeners($listeners) ==> self
      *
-     * @param \App\Server\Entities\Prizes $prizes
+     * @param \App\Server\Entities\Listeners $listeners
      *
-     * @return \App\Server\Entities\Prizes|self
+     * @return \App\Server\Entities\Listeners|self
      */
-    public function prizes(Prizes $prizes = null)
+    public function listeners(Listeners $listeners = null)
     {
-        return $this->property(__FUNCTION__, $prizes);
+        return $this->property(__FUNCTION__, $listeners);
+    }
+
+    /**
+     * Bind a message to a command so that the command listens for
+     * the message as an event and is ran when the event occurs.
+     *
+     * @param \App\Server\Contracts\Message $message to listen for
+     * @param \App\Server\Contracts\Command $command to run
+     *
+     * @return self
+     */
+    public function listen(Message $message, Command $command)
+    {
+        $listener = Listener::make()
+            ->dispatcher($this)
+            ->register($message, $command);
+
+        return $this->listener($listener);
+    }
+
+    /**
+     * Add a listener to the collection of listeners.
+     *
+     * @param \App\Server\Contracts\Listener $listener to add
+     *
+     * @return self
+     */
+    public function listener(Listener $listener)
+    {
+        $this->listeners()->add($listener->dispatcher($this));
+
+        return $this;
+    }
+
+    /**
+     * Remove a listener from the collection of listeners.
+     *
+     * @param \App\Server\Contracts\Listener $listener to remove
+     *
+     * @return self
+     */
+    public function silence(Listener $listener)
+    {
+        $this->listeners()->remove($listener);
+
+        return $this;
+    }
+
+    /**
+     * Get or set the processes that are running.
+     *
+     * @example processes() ==> \App\Server\Entities\Processes
+     *          processes($processes) ==> self
+     *
+     * @param \App\Server\Entities\Processes $processes
+     *
+     * @return \App\Server\Entities\Processes|self
+     */
+    public function processes(Processes $processes = null)
+    {
+        return $this->property(__FUNCTION__, $processes);
+    }
+
+    /**
+     * Add a process to the processes and begin running it.
+     *
+     * @param \App\Server\Contracts\Process $process to add
+     *
+     * @return self
+     */
+    public function execute(Process $process)
+    {
+        $process->dispatcher($this);
+
+        $this->processes()->add($process);
+
+        $process->start($this->loop());
+
+        return $this;
+    }
+
+    /**
+     * Stop a process that is running and remove it from the processes.
+     *
+     * @param \App\Server\Contracts\Process $process to terminate
+     *
+     * @return self
+     */
+    public function terminate(Process $process)
+    {
+        $process->stop();
+
+        $this->processes()->remove($process);
+
+        return $this;
+    }
+
+    /**
+     * Pipe the output of one process to the input of another process.
+     * Both processes will be added to the processes and started automatically.
+     *
+     * @param \App\Server\Contracts\Process $input  to pipe to output
+     * @param \App\Server\Contracts\Process $output to receive from input pipe
+     *
+     * @return self
+     */
+    public function pipe(Process $input, Process $output)
+    {
+        // Start both processes
+        $this->execute($input)
+            ->execute($output);
+
+        // Cascade the termination of one process to the other
+        $input->on('exit', function ($exitCode, $termSignal) use ($output) {
+            $this->terminate($output);
+        });
+
+        // Pipe process output of one process to process input of the other
+        $input->output()->on('data', function ($chunk) use ($output) {
+            $output->input()->write($chunk);
+        });
+
+        return $this;
     }
 
     /**
@@ -509,7 +715,7 @@ class Manager implements ManagerInterface
      *
      * @return \App\Server\Contracts\Message
      */
-    protected function prepareMessageForBroker(Message $message)
+    protected function prepareMessage(Message $message)
     {
         return $message->id(Uuid::uuid4()->toString())
             ->name(class_basename($message))

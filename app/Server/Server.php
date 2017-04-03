@@ -3,14 +3,16 @@
 namespace App\Server;
 
 use App\Server\Contracts\Broker as BrokerInterface;
+use App\Server\Contracts\Manager as ManagerInterface;
 use App\Server\Contracts\Server as ServerInterface;
-use App\Server\Entities\Connections;
 use App\Server\Traits\FluentProperties;
 use Illuminate\Contracts\Queue\Queue;
 use Illuminate\Support\Facades\Queue as QueueManager;
+use InvalidArgumentException;
 use Ratchet\Http\HttpServer;
 use Ratchet\Server\IoServer;
 use Ratchet\WebSocket\WsServer;
+use React\EventLoop\LoopInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class Server implements ServerInterface
@@ -19,13 +21,16 @@ class Server implements ServerInterface
 
     protected $address = '0.0.0.0';
     protected $broker;
+    protected $config = [];
     protected $connector;
     protected $http;
+    protected $manager;
     protected $output;
     protected $port = 8080;
     protected $queue = 'default';
     protected $socket;
     protected $websocket;
+    protected static $instance;
 
     /**
      * Make a new instance of the server.
@@ -35,11 +40,30 @@ class Server implements ServerInterface
     public static function make()
     {
         $server = app(static::class)
-            ->broker(new Broker(new Manager(new Connections())));
+            ->uses(config('server'))
+            ->uses(new Manager())
+            ->uses(new Broker());
 
-        return $server->websocket(new WsServer($server->broker()))
-            ->http(new HttpServer($server->websocket()))
-            ->socket(IoServer::factory($server->http(), $server->port(), $server->address()));
+        self::$instance = $server
+            ->uses(new WsServer($server->broker()))
+            ->uses(new HttpServer($server->websocket()))
+            ->uses(IoServer::factory($server->http(), $server->port(), $server->address()));
+
+        return $server;
+    }
+
+    /**
+     * Get a new or the existing instance of the server.
+     *
+     * @return self
+     */
+    public static function instance()
+    {
+        if ( ! self::$instance instanceof self) {
+            self::make();
+        }
+
+        return self::$instance;
     }
 
     /**
@@ -71,7 +95,7 @@ class Server implements ServerInterface
      */
     public function start()
     {
-        $this->broker()->manager()->start();
+        $this->manager()->start();
     }
 
     /**
@@ -79,24 +103,41 @@ class Server implements ServerInterface
      */
     public function stop()
     {
-        $this->broker()->manager()->stop();
+        $this->manager()->stop();
     }
 
     /**
-     * Get or set the password the server accepts for admin commands.
+     * Get or set the config settings.
      *
-     * @example password() ==> 'opensesame'
-     *          password('opensesame') ==> self
+     * @example config() ==> array
+     *          config(array $settings) ==> self
+     *          config('key') ==> mixed
+     *          config('key', $value) ==> self
      *
-     * @param string $password
+     * @param array|string $key   to set or get
+     * @param mixed        $value to set under the key
      *
-     * @return string|self
+     * @return mixed|self
      */
-    public function password($password = null)
+    public function config($key = null, $value = null)
     {
-        $this->broker()->manager()->password($password);
+        if (is_array($key)) {
+            return $this->property(__FUNCTION__, $key);
+        }
 
-        return $this;
+        if (is_string($key) && is_null($value)) {
+            return array_get($this->property(__FUNCTION__), $key);
+        }
+
+        if (is_string($key) && ! is_null($value)) {
+            $config = $this->config();
+            array_set($config, $key, $value);
+            $this->config($config);
+
+            return $this;
+        }
+
+        return $this->property(__FUNCTION__);
     }
 
     /**
@@ -111,6 +152,10 @@ class Server implements ServerInterface
      */
     public function address($ip4 = null)
     {
+        if ( ! is_null($ip4)) {
+            $this->config(__FUNCTION__, $ip4);
+        }
+
         return $this->property(__FUNCTION__, $ip4);
     }
 
@@ -126,6 +171,10 @@ class Server implements ServerInterface
      */
     public function port($number = null)
     {
+        if ( ! is_null($number)) {
+            $this->config(__FUNCTION__, $number);
+        }
+
         return $this->property(__FUNCTION__, $number);
     }
 
@@ -156,6 +205,91 @@ class Server implements ServerInterface
     }
 
     /**
+     * Set an instance of a service that should be used by the server.
+     *
+     * @example uses(\Illuminate\Contracts\Queue\Queue $service, 'default') to set a connector and queue
+     *          uses(\Symfony\Component\Console\Output\OutputInterface $service) to set the output logging interface
+     *          uses(\App\Server\Contracts\Manager $manager) to set connection manager
+     *          uses(\App\Server\Contracts\Broker $broker) to set message broker
+     *          uses(\Ratchet\WebSocket\WsServer $server) to set WebSocket server
+     *          uses(\Ratchet\Http\HttpServer $server) to set HTTP server
+     *          uses(\Ratchet\Server\IoServer $socket) to set I/O socket
+     *          uses(\React\EventLoop\LoopInterface $loop) to set event loop
+     *          uses(array $config) to set the configuration settings
+     *
+     * @param mixed $service
+     *
+     * @throws \InvalidArgumentException if service is not supported
+     *
+     * @return self
+     */
+    public function uses($service)
+    {
+        if ($service instanceof Queue) {
+            return call_user_func_array([$this, 'usesQueue'], func_get_args());
+        }
+
+        if ($service instanceof OutputInterface) {
+            return $this->logger($service);
+        }
+
+        if ($service instanceof ManagerInterface) {
+            return $this->manager($service);
+        }
+
+        if ($service instanceof BrokerInterface) {
+            return $this->broker($service);
+        }
+
+        if ($service instanceof WsServer) {
+            return $this->websocket($service);
+        }
+
+        if ($service instanceof HttpServer) {
+            return $this->http($service);
+        }
+
+        if ($service instanceof IoServer) {
+            return $this->socket($service);
+        }
+
+        if ($service instanceof LoopInterface) {
+            return $this->loop($service);
+        }
+
+        if (is_array($service)) {
+            return $this->config($service);
+        }
+
+        throw new InvalidArgumentException(get_class($service).' is not a supported service.');
+    }
+
+    /**
+     * Set the queue the server processes.
+     *
+     * @example usesQueue() is equivalent to usesQueue('default', 'default')
+     *          usesQueue($connection) to inject an existing connector
+     *          usesQueue('beanstalkd') to use beanstalkd driver on default queue
+     *          usesQueue('beanstalkd', 'server') to use beanstalkd driver on server queue
+     *
+     * @param string|\Illuminate\Contracts\Queue\Queue $connection
+     * @param string                                   $name
+     *
+     * @return self
+     */
+    public function usesQueue($connection = null, $name = null)
+    {
+        if ( ! $connection instanceof Queue) {
+            $connection = QueueManager::connection($connection);
+        }
+
+        $this->connector($connection);
+        $this->queue($name);
+
+        return $this;
+    }
+
+    /**
      * Get or set the queue connector the server uses.
      *
      * @example connector() ==> \Illuminate\Contracts\Queue\Queue
@@ -167,7 +301,11 @@ class Server implements ServerInterface
      */
     public function connector(Queue $instance = null)
     {
-        $this->broker()->manager()->connector($instance);
+        if ( ! is_null($instance)) {
+            $this->config(__FUNCTION__, $instance);
+        }
+
+        $this->manager()->connector($instance);
 
         return $this;
     }
@@ -184,49 +322,11 @@ class Server implements ServerInterface
      */
     public function queue($name = null)
     {
-        $this->broker()->manager()->queue($name);
-
-        return $this;
-    }
-
-    /**
-     * Set the queue the server processes.
-     *
-     * @example useQueue() is equivalent to useQueue('default', 'default')
-     *          useQueue($connection) to inject an existing connector
-     *          useQueue('beanstalkd') to use beanstalkd driver on default queue
-     *          useQueue('beanstalkd', 'server') to use beanstalkd driver on server queue
-     *
-     * @param string|\Illuminate\Contracts\Queue\Queue $connection
-     * @param string                                   $name
-     *
-     * @return self
-     */
-    public function useQueue($connection = null, $name = null)
-    {
-        if ( ! $connection instanceof Queue) {
-            $connection = QueueManager::connection($connection);
+        if ( ! is_null($name)) {
+            $this->config(__FUNCTION__, $name);
         }
 
-        $this->connector($connection);
-        $this->queue($name);
-
-        return $this;
-    }
-
-    /**
-     * Get or set the maximum number of connections the server allows to connect.
-     *
-     * @example maxConnections() ==> 100
-     *          maxConnections(100) ==> self
-     *
-     * @param int $number of maximium connections allowed to connect
-     *
-     * @return int|self
-     */
-    public function maxConnections($number = null)
-    {
-        $this->broker()->maxConnections($number);
+        $this->manager()->queue($name);
 
         return $this;
     }
@@ -249,7 +349,22 @@ class Server implements ServerInterface
     }
 
     /**
-     * Get or set the event broker the server uses.
+     * Get or set the connection manager the server uses.
+     *
+     * @example manager() ==> \App\Server\Contracts\Manager
+     *          manager($instance) ==> self
+     *
+     * @param \App\Server\Contracts\Manager $instance
+     *
+     * @return \App\Server\Contracts\Manager|self
+     */
+    public function manager(ManagerInterface $instance = null)
+    {
+        return $this->property(__FUNCTION__, $instance);
+    }
+
+    /**
+     * Get or set the message broker the server uses.
      *
      * @example broker() ==> \App\Server\Contracts\Broker
      *          broker($instance) ==> self
@@ -260,10 +375,6 @@ class Server implements ServerInterface
      */
     public function broker(BrokerInterface $instance = null)
     {
-        if ( ! is_null($instance)) {
-            $instance->manager()->broker($instance);
-        }
-
         return $this->property(__FUNCTION__, $instance);
     }
 
@@ -309,10 +420,44 @@ class Server implements ServerInterface
      */
     public function socket(IoServer $instance = null)
     {
+        return $this->property(__FUNCTION__, $instance);
+    }
+
+    /**
+     * Get or set the event loop the server uses.
+     *
+     * @example loop() ==> \React\EventLoop\LoopInterface
+     *          loop($instance) ==> self
+     *
+     * @param \React\EventLoop\LoopInterface $instance
+     *
+     * @return \React\EventLoop\LoopInterface|self
+     */
+    public function loop(LoopInterface $instance = null)
+    {
         if ( ! is_null($instance)) {
-            $this->broker()->manager()->loop($instance->loop);
+            $this->socket()->loop = $instance;
+
+            return $this;
         }
 
-        return $this->property(__FUNCTION__, $instance);
+        return $this->socket()->loop;
+    }
+
+    /**
+     * Map undefined methods to config() method calls.
+     *
+     * @param  password() ==> config('password') ==> mixed
+     *         password($value) ==> config('password', $value) ==> self
+     * @param string $method which maps to config key
+     * @param array  $args   which become the config value
+     *
+     * @return mixed|self
+     */
+    public function __call($method, $args = [])
+    {
+        array_unshift($args, snake_case($method));
+
+        return call_user_func_array([$this, 'config'], $args);
     }
 }

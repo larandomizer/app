@@ -2,6 +2,7 @@
 
 namespace App\Server\Entities;
 
+use App\Server\Contracts\Connection;
 use App\Server\Traits\UUIDFilter;
 use Illuminate\Support\Collection;
 use Ratchet\ConnectionInterface;
@@ -9,6 +10,34 @@ use Ratchet\ConnectionInterface;
 class Connections extends Collection
 {
     use UUIDFilter;
+
+    /**
+     * Add a connection to the collection.
+     *
+     * @param App\Server\Contracts\Connection $connection
+     *
+     * @return self
+     */
+    public function add(Connection $connection)
+    {
+        $this->put($connection->uuid(), $connection);
+
+        return $this;
+    }
+
+    /**
+     * Remove a connection from the collection.
+     *
+     * @param App\Server\Contracts\Connection $connection
+     *
+     * @return self
+     */
+    public function remove(Connection $connection)
+    {
+        $this->forget($connection->uuid(), $connection);
+
+        return $this;
+    }
 
     /**
      * Filter connections to those with the registered type.

@@ -6,6 +6,7 @@ use Illuminate\Contracts\Queue\Queue;
 use Ratchet\Http\HttpServer;
 use Ratchet\Server\IoServer;
 use Ratchet\WebSocket\WsServer;
+use React\EventLoop\LoopInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 interface Server
@@ -16,6 +17,13 @@ interface Server
      * @return self
      */
     public static function make();
+
+    /**
+     * Get a new or the existing instance of the server.
+     *
+     * @return self
+     */
+    public static function instance();
 
     /**
      * Set the bindings for the server.
@@ -42,16 +50,19 @@ interface Server
     public function stop();
 
     /**
-     * Get or set the password the server accepts for admin commands.
+     * Get or set the config settings.
      *
-     * @example password() ==> 'opensesame'
-     *          password('opensesame') ==> self
+     * @example config() ==> array
+     *          config(array $settings) ==> self
+     *          config('key') ==> mixed
+     *          config('key', $value) ==> self
      *
-     * @param string $password
+     * @param array|string $key   to set or get
+     * @param mixed        $value to set under the key
      *
-     * @return string|self
+     * @return mixed|self
      */
-    public function password($password = null);
+    public function config($key = null, $value = null);
 
     /**
      * Get or set the address the server binds to.
@@ -93,10 +104,31 @@ interface Server
     public function bindings($address = null, $port = null);
 
     /**
+     * Set an instance of a service that should be used by the server.
+     *
+     * @example uses(\Illuminate\Contracts\Queue\Queue $service, 'default') to set a connector and queue
+     *          uses(\Symfony\Component\Console\Output\OutputInterface $service) to set the output logging interface
+     *          uses(\App\Server\Contracts\Manager $manager) to set connection manager
+     *          uses(\App\Server\Contracts\Broker $broker) to set message broker
+     *          uses(\Ratchet\WebSocket\WsServer $server) to set WebSocket server
+     *          uses(\Ratchet\Http\HttpServer $server) to set HTTP server
+     *          uses(\Ratchet\Server\IoServer $socket) to set I/O socket
+     *          uses(\React\EventLoop\LoopInterface $loop) to set event loop
+     *          uses(array $config) to set the configuration settings
+     *
+     * @param mixed $service
+     *
+     * @throws \InvalidArgumentException if service is not supported
+     *
+     * @return self
+     */
+    public function uses($service);
+
+    /**
      * Get or set the queue connector the server uses.
      *
      * @example connector() ==> \Illuminate\Contracts\Queue\Queue
-     *          connector($connector) ==> self
+     *          connector($instance) ==> self
      *
      * @param \Illuminate\Contracts\Queue\Queue $instance
      *
@@ -117,43 +149,28 @@ interface Server
     public function queue($name = null);
 
     /**
-     * Set the queue the server processes.
-     *
-     * @example useQueue() is equivalent to useQueue('default', 'default')
-     *          useQueue($connection) to inject an existing connector
-     *          useQueue('beanstalkd') to use beanstalkd driver on default queue
-     *          useQueue('beanstalkd', 'server') to use beanstalkd driver on server queue
-     *
-     * @param string|\Illuminate\Contracts\Queue\Queue $connection
-     * @param string                                   $name
-     *
-     * @return self
-     */
-    public function useQueue($connection = null, $name = null);
-
-    /**
-     * Get or set the maximum number of connections the server allows to connect.
-     *
-     * @example maxConnections() ==> 100
-     *          maxConnections(100) ==> self
-     *
-     * @param int $number of maximium connections allowed to connect
-     *
-     * @return int|self
-     */
-    public function maxConnections($number = null);
-
-    /**
-     * Get or set the output interface the server pipes output to.
+     * Get or set the logger interface the server pipes output to.
      *
      * @example logger() ==> \Symfony\Component\Console\Output\OutputInterface
-     *          logger($instance) ==> self
+     *          logger($interface) ==> self
      *
      * @param \Symfony\Component\Console\Output\OutputInterface $interface
      *
      * @return \Symfony\Component\Console\Output\OutputInterface|self
      */
-    public function logger(OutputInterface $instance = null);
+    public function logger(OutputInterface $interface = null);
+
+    /**
+     * Get or set the connection manager the server uses.
+     *
+     * @example manager() ==> \App\Server\Contracts\Manager
+     *          manager($instance) ==> self
+     *
+     * @param \App\Server\Contracts\Manager $instance
+     *
+     * @return \App\Server\Contracts\Manager|self
+     */
+    public function manager(Manager $instance = null);
 
     /**
      * Get or set the message broker the server uses.
@@ -171,7 +188,7 @@ interface Server
      * Get or set the WebSocket instance the server uses.
      *
      * @example websocket() ==> \Ratchet\WebSocket\WsServer
-     *          websocket($websocket) ==> self
+     *          websocket($instance) ==> self
      *
      * @param \Ratchet\WebSocket\WsServer $instance
      *
@@ -183,7 +200,7 @@ interface Server
      * Get or set the HTTP instance the server uses.
      *
      * @example http() ==> \Ratchet\Http\HttpServer
-     *          http($http) ==> self
+     *          http($instance) ==> self
      *
      * @param \Ratchet\Http\HttpServer $instance
      *
@@ -202,4 +219,16 @@ interface Server
      * @return \Ratchet\Server\IoServer|self
      */
     public function socket(IoServer $instance = null);
+
+    /**
+     * Get or set the event loop the server uses.
+     *
+     * @example loop() ==> \React\EventLoop\LoopInterface
+     *          loop($instance) ==> self
+     *
+     * @param \React\EventLoop\LoopInterface $instance
+     *
+     * @return \React\EventLoop\LoopInterface|self
+     */
+    public function loop(LoopInterface $instance = null);
 }

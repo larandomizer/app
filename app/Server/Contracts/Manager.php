@@ -4,25 +4,22 @@ namespace App\Server\Contracts;
 
 use App\Server\Entities\Commands;
 use App\Server\Entities\Connections;
+use App\Server\Entities\Listeners;
+use App\Server\Entities\Processes;
+use App\Server\Entities\Timers;
 use App\Server\Entities\Topics;
 use Exception;
 use Illuminate\Contracts\Queue\Job;
 use Illuminate\Contracts\Queue\Queue;
-use React\EventLoop\LoopInterface as Loop;
 
 interface Manager
 {
     /**
-     * Get or set the password the server accepts for admin commands.
+     * Setup the initial state of the manager when starting.
      *
-     * @example password() ==> 'opensesame'
-     *          password('opensesame') ==> self
-     *
-     * @param string $password
-     *
-     * @return string|self
+     * @return self
      */
-    public function password($password = null);
+    public function boot();
 
     /**
      * Called when the server is started.
@@ -71,12 +68,11 @@ interface Manager
      * Broadcast message to multiple connections.
      *
      * @param \App\Server\Contracts\Message    $message
-     * @param \App\Server\Entities\Connections $connections to send to
-     * @param bool                             $silent      output
+     * @param \App\Server\Entities\Connections $connections to send to (defaults to everyone)
      *
      * @return self
      */
-    public function broadcast(Message $message, Connections $connections);
+    public function broadcast(Message $message, Connections $connections = null);
 
     /**
      * Called when a new message is received from an open connection.
@@ -170,28 +166,68 @@ interface Manager
     public function unsubscribe(Topic $topic, Connection $connection);
 
     /**
-     * Get or set the event loop the server runs on.
+     * Get or set the timers available for executing.
      *
-     * @example loop() ==> \React\EventLoop\LoopInterface
-     *          loop($instance) ==> self
+     * @example timers() ==> \App\Server\Entities\Timers
+     *          timers($timers) ==> self
      *
-     * @param \React\EventLoop\LoopInterface $instance
+     * @param \App\Server\Entities\Timers $timers
      *
-     * @return \React\EventLoop\LoopInterface|self
+     * @return \App\Server\Entities\Timers|self
      */
-    public function loop(Loop $instance = null);
+    public function timers(Timers $timers = null);
 
     /**
-     * Get or set the broker that communicates with the server.
+     * Add a timer to the event loop.
      *
-     * @example broker() ==> \App\Server\Contracts\Broker
-     *          broker($instance) ==> self
+     * @param \App\Server\Contracts\Timer $timer to add
      *
-     * @param \App\Server\Contracts\Broker $instance
-     *
-     * @return \App\Server\Contracts\Broker|self
+     * @return self
      */
-    public function broker(Broker $instance = null);
+    public function add(Timer $timer);
+
+    /**
+     * Pause a timer in the event loop so that it does not run until resumed.
+     *
+     * @param \App\Server\Contracts\Timer $timer to pause
+     *
+     * @return self
+     */
+    public function pause(Timer $timer);
+
+    /**
+     * Resume a timer in the event loop that was previously paused.
+     *
+     * @param \App\Server\Contracts\Timer $timer to resume
+     *
+     * @return self
+     */
+    public function resume(Timer $timer);
+
+    /**
+     * Add a timer that runs only once after the initial delay.
+     *
+     * @param \App\Server\Contracts\Timer $timer to run once
+     *
+     * @return self
+     */
+    public function once(Timer $timer);
+
+    /**
+     * Cancel a timer in the event loop that is currently active.
+     *
+     * @param \App\Server\Contracts\Timer $timer to cancel
+     *
+     * @return self
+     */
+    public function cancel(Timer $timer);
+
+    /**
+     * Get the event loop the server runs on.
+     *
+     * @return \React\EventLoop\LoopInterface
+     */
+    public function loop();
 
     /**
      * Get or set the queue connector the server uses.
@@ -264,4 +300,86 @@ interface Manager
      * @return self
      */
     public function abort(Command $command);
+
+    /**
+     * Get or set the listeners that are registered.
+     *
+     * @example listeners() ==> \App\Server\Entities\Listeners
+     *          listeners($listeners) ==> self
+     *
+     * @param \App\Server\Entities\Listeners $listeners
+     *
+     * @return \App\Server\Entities\Listeners|self
+     */
+    public function listeners(Listeners $listeners = null);
+
+    /**
+     * Bind a message to a command so that the command listens for
+     * the message as an event and is ran when the event occurs.
+     *
+     * @param \App\Server\Contracts\Message $message to listen for
+     * @param \App\Server\Contracts\Command $command to run
+     *
+     * @return self
+     */
+    public function listen(Message $message, Command $command);
+
+    /**
+     * Add a listener to the collection of listeners.
+     *
+     * @param \App\Server\Contracts\Listener $listener to add
+     *
+     * @return self
+     */
+    public function listener(Listener $listener);
+
+    /**
+     * Remove a listener from the collection of listeners.
+     *
+     * @param \App\Server\Contracts\Listener $listener to remove
+     *
+     * @return self
+     */
+    public function silence(Listener $listener);
+
+    /**
+     * Get or set the processes that are running.
+     *
+     * @example processes() ==> \App\Server\Entities\Processes
+     *          processes($processes) ==> self
+     *
+     * @param \App\Server\Entities\Processes $processes
+     *
+     * @return \App\Server\Entities\Processes|self
+     */
+    public function processes(Processes $processes = null);
+
+    /**
+     * Add a process to the processes and begin running it.
+     *
+     * @param \App\Server\Contracts\Process $process to add
+     *
+     * @return self
+     */
+    public function execute(Process $process);
+
+    /**
+     * Stop a process that is running and remove it from the processes.
+     *
+     * @param \App\Server\Contracts\Process $process to terminate
+     *
+     * @return self
+     */
+    public function terminate(Process $process);
+
+    /**
+     * Pipe the output of one process to the input of another process.
+     * Both processes will be added to the processes and started automatically.
+     *
+     * @param \App\Server\Contracts\Process $input  to pipe to output
+     * @param \App\Server\Contracts\Process $output to receive from input pipe
+     *
+     * @return self
+     */
+    public function pipe(Process $input, Process $output);
 }

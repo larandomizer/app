@@ -3,7 +3,6 @@
 namespace App\Server\Entities;
 
 use App\Server\Contracts\Connection as ConnectionInterface;
-use App\Server\Contracts\Prize;
 use App\Server\Contracts\Topic;
 use App\Server\Traits\FluentProperties;
 use App\Server\Traits\JsonHelpers;
@@ -19,11 +18,11 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
     use FluentProperties, JsonHelpers;
 
     protected $admin;
+    protected $attributes = [];
     protected $email;
     protected $ip_address;
     protected $name;
     protected $notifications;
-    protected $prize;
     protected $socket;
     protected $subscriptions;
     protected $timestamp;
@@ -213,7 +212,7 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
      */
     public function subscribe(Topic $topic)
     {
-        $this->topics()->put($topic->uuid(), $topic);
+        $this->topics()->add($topic);
 
         return $this;
     }
@@ -227,24 +226,9 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
      */
     public function unsubscribe(Topic $topic)
     {
-        $this->topics()->forget($topic->uuid());
+        $this->topics()->remove($topic);
 
         return $this;
-    }
-
-    /**
-     * Get or set the prize the connection won.
-     *
-     * @example prize() ==> \App\Server\Contracts\Prize
-     *          prize($prize) ==> self
-     *
-     * @param \App\Server\Contracts\Prize $prize
-     *
-     * @return \App\Server\Contracts\Prize|self
-     */
-    public function prize(Prize $prize = null)
-    {
-        return $this->property(__FUNCTION__, $prize);
     }
 
     /**
@@ -269,20 +253,46 @@ class Connection implements ConnectionInterface, Arrayable, Jsonable, JsonSerial
      */
     public function toArray()
     {
-        return array_filter([
+        $attributes = [];
+        foreach ($this->attributes as $key => $value) {
+            $attributes[$key] = is_object($value) ? $value->toArray() : $value;
+        }
+
+        return array_filter(array_merge($attributes, [
             'admin'         => $this->admin(),
             'email'         => $this->email(),
             'ip_address'    => $this->ipAddress(),
             'name'          => $this->name(),
             'notifications' => $this->notifications()->toArray(),
-            'prize'         => $this->prize() ? $this->prize()->toArray() : null,
             'resource_id'   => $this->socket()->resourceId,
             'subscriptions' => $this->subscriptions()->toArray(),
             'timestamp'     => $this->timestamp()->timestamp,
             'type'          => $this->type(),
             'uuid'          => $this->uuid(),
-        ], function ($value) {
+        ]), function ($value) {
             return ((is_array($value) || is_string($value)) && ! empty($value)) || ! is_null($value);
         });
+    }
+
+    /**
+     * Get or set additional macroable values on the connection.
+     *
+     * @example foo() ==> mixed
+     *          foo($value) ==> self
+     *
+     * @param string $method
+     * @param mixed  $arguments
+     *
+     * @return mixed|self
+     */
+    public function __call($method, $arguments = [])
+    {
+        if (empty($arguments)) {
+            return array_get($this->attributes, $method);
+        }
+
+        array_set($this->attributes, $method, $arguments);
+
+        return $this;
     }
 }

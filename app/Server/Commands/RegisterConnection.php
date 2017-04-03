@@ -37,6 +37,6 @@ class RegisterConnection extends Command
 
         return $this->dispatcher()
             ->send(new ConnectionRegistered($connection), $connection)
-            ->broadcast(new UpdateConnections($everyone), $everyone);
+            ->broadcast(new UpdateConnections($everyone));
     }
 }

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Server\Entities;
+namespace App\Giveaway\Entities;
 
-use App\Server\Contracts\Prize as PrizeInterface;
+use App\Giveaway\Contracts\Prize as PrizeInterface;
 use App\Server\Traits\FluentProperties;
 use App\Server\Traits\JsonHelpers;
 use Illuminate\Contracts\Support\Arrayable;

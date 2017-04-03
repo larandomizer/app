@@ -14,11 +14,4 @@ interface Message extends Jsonable
      * @return \App\Server\Contracts\Manager|self
      */
     public function dispatcher(Manager $instance = null);
-
-    /**
-     * Handle the message.
-     *
-     * @return mixed
-     */
-    public function handle();
 }

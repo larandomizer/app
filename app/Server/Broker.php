@@ -11,7 +11,6 @@ use App\Server\Messages\MessageException;
 use App\Server\Traits\FluentProperties;
 use App\Server\Traits\RatchetAdapter;
 use Exception;
-use InvalidArgumentException;
 use Ratchet\MessageComponentInterface as RatchetInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -21,8 +20,6 @@ class Broker implements BrokerInterface, LoggerInterface, RatchetInterface
 
     protected $logger;
     protected $logging = true;
-    protected $manager;
-    protected $max_connections;
 
     /**
      * Inject and setup the dependencies.
@@ -30,40 +27,19 @@ class Broker implements BrokerInterface, LoggerInterface, RatchetInterface
      * @param \App\Server\Manager                               $manager
      * @param \Symfony\Component\Console\Output\OutputInterface $logger
      */
-    public function __construct(Manager $manager, OutputInterface $logger = null)
+    public function __construct(OutputInterface $logger = null)
     {
-        $this->manager($manager);
         $this->logger($logger);
     }
 
     /**
-     * Get or set the manager interface that controls the event loop application.
+     * Get the manager interface that controls the event loop application.
      *
-     * @example manager() ==> \App\Server\Contracts\Manager
-     *          manager($interface) ==> self
-     *
-     * @param \App\Server\Contracts\Manager $interface
-     *
-     * @return \App\Server\Contracts\Manager|self
+     * @return \App\Server\Contracts\Manager
      */
-    public function manager(Manager $interface = null)
+    public function manager()
     {
-        return $this->property(__FUNCTION__, $interface);
-    }
-
-    /**
-     * Get or set the maximum number of connections the server allows to connect.
-     *
-     * @example maxConnections() ==> 100
-     *          maxConnections(100) ==> self
-     *
-     * @param int $number of maximium connections allowed to connect
-     *
-     * @return int|self
-     */
-    public function maxConnections($number = null)
-    {
-        return $this->property(snake_case(__FUNCTION__), $number);
+        return Server::instance()->manager();
     }
 
     /**
@@ -164,8 +140,7 @@ class Broker implements BrokerInterface, LoggerInterface, RatchetInterface
         }
 
         try {
-            $message = $this->resolveMessage($message);
-            $this->manager()->receive($message, $connection);
+            $this->manager()->receive($this->resolveMessage($message), $connection);
         } catch (Exception $exception) {
             $this->end(new MessageException($exception), $connection);
         }
@@ -241,7 +216,7 @@ class Broker implements BrokerInterface, LoggerInterface, RatchetInterface
     }
 
     /**
-     * Log to the output. @todo could use some refactoring.
+     * Log to the output.
      *
      * @param mixed $message that can be cast to a string
      *
@@ -249,6 +224,10 @@ class Broker implements BrokerInterface, LoggerInterface, RatchetInterface
      */
     public function log($message)
     {
+        if ( ! $this->logger()) {
+            return $this;
+        }
+
         if ($message instanceof Exception) {
             $this->logger()->writeln($message->getMessage());
 
@@ -283,9 +262,21 @@ class Broker implements BrokerInterface, LoggerInterface, RatchetInterface
     }
 
     /**
+     * Get the maximum connections allowed.
+     *
+     * @return int
+     */
+    protected function maxConnections()
+    {
+        return Server::instance()->config(snake_case(__FUNCTION__));
+    }
+
+    /**
      * Parse the message arguments into a message entity.
      *
      * @param string $message to parse
+     *
+     * @throws \InvalidArgumentException if message is not a ClientMessage
      *
      * @return \App\Server\Contracts\Message
      */
@@ -293,11 +284,29 @@ class Broker implements BrokerInterface, LoggerInterface, RatchetInterface
     {
         $arguments = (array) json_decode($message, true);
         $name = array_get($arguments, 'name');
-        $class = str_replace(class_basename($this), 'Messages\\'.$name, get_class($this));
-        if ( ! class_exists($class)) {
-            throw new InvalidArgumentException($class.' does not exist.');
-        }
+        $class = $this->resolveMessageClass($name);
 
         return new $class($arguments);
+    }
+
+    /**
+     * Resolve the message class from the name by searching in the paths.
+     *
+     * @param string $name of class
+     *
+     * @throws \InvalidArgumentException if class cannot be found in path.
+     *
+     * @return string
+     */
+    protected function resolveMessageClass($name)
+    {
+        foreach ((array) Server::instance()->namespaces() as $namespace) {
+            $class = $namespace.$name;
+            if (class_exists($class)) {
+                return $class;
+            }
+        }
+
+        throw new InvalidArgumentException($name.' message does not exist in the namespaces.');
     }
 }

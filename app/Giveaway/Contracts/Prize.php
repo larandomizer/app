@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Server\Contracts;
+namespace App\Giveaway\Contracts;
 
 interface Prize
 {
