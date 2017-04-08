@@ -77,26 +77,26 @@ interface Timer
      * executed within the event loop.
      *
      * @example interval() ==> int
-     *          interval($seconds) ==> self
+     *          interval($milliseconds) ==> self
      *
-     * @param int|float $seconds
+     * @param int|float $milliseconds
      *
      * @return int|float|self
      */
-    public function interval($seconds = null);
+    public function interval($milliseconds = null);
 
     /**
      * Get or set the timeout at which the periodic timer will be
      * stopped within the event loop.
      *
      * @example timeout() ==> int
-     *          timeout($seconds) ==> self
+     *          timeout($milliseconds) ==> self
      *
-     * @param int|float $seconds
+     * @param int|float $milliseconds
      *
      * @return int|float|self
      */
-    public function timeout($seconds = null);
+    public function timeout($milliseconds = null);
 
     /**
      * Set the timeout such that the timer only runs once.

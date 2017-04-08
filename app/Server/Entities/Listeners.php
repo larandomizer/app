@@ -32,7 +32,7 @@ class Listeners extends Collection
      */
     public function remove(Listener $listener)
     {
-        $index = array_search($this->items, $listener, $strict = true);
+        $index = array_search($listener, $this->items, $strict = true);
         if ($index === false) {
             $this->offsetUnset($index);
         }

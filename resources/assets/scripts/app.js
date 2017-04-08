@@ -65,7 +65,9 @@ const app = new Vue({
         });
         Event.listen('PromptForAuthentication', message => {
             this.displayPasswordModal();
-            this.previous = message.previous;
+            if( message.previous.name !== 'Authenticate' ) {
+                this.previous = message.previous;
+            }
         });
         Event.listen('UpdateConnections', message => {
             this.connections = _.values(message.connections);

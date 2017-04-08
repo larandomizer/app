@@ -37,7 +37,7 @@ class Timers extends Collection
     {
         $timer->stop();
 
-        $index = array_search($this->items, $timer, $strict = true);
+        $index = array_search($timer, $this->items, $strict = true);
         if ($index === false) {
             $this->offsetUnset($index);
         }

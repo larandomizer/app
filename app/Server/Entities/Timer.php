@@ -5,6 +5,7 @@ namespace App\Server\Entities;
 use App\Server\Contracts\Manager;
 use App\Server\Contracts\Timer as TimerInterface;
 use App\Server\Traits\FluentProperties;
+use Exception;
 use InvalidArgumentException;
 
 abstract class Timer implements TimerInterface
@@ -31,12 +32,24 @@ abstract class Timer implements TimerInterface
         $this->started(true)
             ->paused(false);
 
+        $seconds = $this->interval() / 1000;
+
         $this->timer = $this->dispatcher()->loop()
-            ->addPeriodicTimer($this->interval(), function () {
+            ->addPeriodicTimer($seconds, function () {
                 if ($this->started() && ! $this->paused()) {
+                    $this->counter($this->counter() + 1);
                     $this->run();
                 }
             });
+
+        if ($this->timeout()) {
+            $seconds = $this->timeout() / 1000;
+
+            $this->dispatcher()->loop()
+                ->addTimer($seconds, function () {
+                    $this->dispatcher()->cancel($this);
+                });
+        }
 
         return $this;
     }
@@ -73,10 +86,16 @@ abstract class Timer implements TimerInterface
      * Resume the timer so that it may be actively
      * executed within the event loop.
      *
+     * @throws \Exception if resume is called before start
+     *
      * @return self
      */
     public function resume()
     {
+        if ( ! $this->started()) {
+            throw new Exception(__CLASS__.' timer cannot be resumed because timer has not been started.');
+        }
+
         $this->paused(false);
 
         return $this;
@@ -135,15 +154,15 @@ abstract class Timer implements TimerInterface
      * executed within the event loop.
      *
      * @example interval() ==> int
-     *          interval($seconds) ==> self
+     *          interval($milliseconds) ==> self
      *
-     * @param int|float $seconds
+     * @param int|float $milliseconds
      *
      * @return int|float|self
      */
-    public function interval($seconds = null)
+    public function interval($milliseconds = null)
     {
-        return $this->property(__FUNCTION__, $seconds);
+        return $this->property(__FUNCTION__, $milliseconds);
     }
 
     /**
@@ -151,15 +170,15 @@ abstract class Timer implements TimerInterface
      * stopped within the event loop.
      *
      * @example timeout() ==> int
-     *          timeout($seconds) ==> self
+     *          timeout($milliseconds) ==> self
      *
-     * @param int|float $seconds
+     * @param int|float $milliseconds
      *
      * @return int|float|self
      */
-    public function timeout($seconds = null)
+    public function timeout($milliseconds = null)
     {
-        return $this->property(__FUNCTION__, $seconds);
+        return $this->property(__FUNCTION__, $milliseconds);
     }
 
     /**

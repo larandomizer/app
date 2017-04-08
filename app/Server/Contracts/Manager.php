@@ -302,6 +302,16 @@ interface Manager
     public function abort(Command $command);
 
     /**
+     * Delay the execution of a command.
+     *
+     * @param \App\Server\Contracts\Command $command to delay
+     * @param int                           $delay   in milliseconds
+     *
+     * @return self
+     */
+    public function delay(Command $command, $delay);
+
+    /**
      * Get or set the listeners that are registered.
      *
      * @example listeners() ==> \App\Server\Entities\Listeners

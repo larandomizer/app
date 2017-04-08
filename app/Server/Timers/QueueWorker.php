@@ -14,6 +14,6 @@ class QueueWorker extends Timer implements ShouldAutoStart
     public function __construct()
     {
         $this->command(GetJob::class)
-            ->interval(1 / 10);
+            ->interval(100);
     }
 }

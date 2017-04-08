@@ -25,11 +25,11 @@ interface Command extends Jsonable
     /**
      * Get or set the delay in milliseconds for the command to be executed.
      *
-     * @param int $delay in ms
+     * @param int $delay in milliseconds
      *
      * @return int|self
      */
-    public function delayed($delay = null);
+    public function delay($delay = null);
 
     /**
      * Run the command.

@@ -22,7 +22,7 @@ abstract class Command extends Fluent implements CommandInterface, ShouldQueue
      */
     public function __construct(array $arguments = [])
     {
-        $this->delayed(0);
+        $this->delay(0);
     }
 
     /**
@@ -40,11 +40,11 @@ abstract class Command extends Fluent implements CommandInterface, ShouldQueue
     /**
      * Get or set the delay in milliseconds for the command to be executed.
      *
-     * @param int $delay in ms
+     * @param int $delay in milliseconds
      *
      * @return int|self
      */
-    public function delayed($delay = null)
+    public function delay($delay = null)
     {
         return $this->property('delay', $delay);
     }

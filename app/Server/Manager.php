@@ -2,6 +2,7 @@
 
 namespace App\Server;
 
+use App\Server\Commands\RunQueuedCommands;
 use App\Server\Contracts\ClientMessage;
 use App\Server\Contracts\Command;
 use App\Server\Contracts\Connection;
@@ -26,6 +27,7 @@ use App\Server\Messages\PromptForAuthentication;
 use App\Server\Messages\UpdateConnections;
 use App\Server\Messages\UpdateSubscriptions;
 use App\Server\Messages\UpdateTopics;
+use App\Server\Timers\DelayedCommand;
 use App\Server\Timers\QueueWorker;
 use App\Server\Traits\FluentProperties;
 use Exception;
@@ -56,6 +58,7 @@ class Manager implements ManagerInterface
     public function boot()
     {
         // Initialize collections
+        $this->commands(new Commands());
         $this->connections(new Connections());
         $this->listeners(new Listeners());
         $this->processes(new Processes());
@@ -535,6 +538,16 @@ class Manager implements ManagerInterface
      */
     public function run(Command $command)
     {
+        if ($command->delay() > 0) {
+            $timer = new DelayedCommand();
+            $timer->command($command)
+                ->interval($command->delay());
+
+            $this->once($timer);
+
+            return $this;
+        }
+
         $command->dispatcher($this)->run();
 
         return $this;
@@ -551,7 +564,9 @@ class Manager implements ManagerInterface
     {
         $this->commands()->add($command);
 
-        // @todo handle executing this on the next tick
+        $this->loop()->nextTick(function () {
+            $this->run(new RunQueuedCommands());
+        });
 
         return $this;
     }
@@ -566,6 +581,23 @@ class Manager implements ManagerInterface
     public function abort(Command $command)
     {
         $this->commands()->remove($command);
+
+        return $this;
+    }
+
+    /**
+     * Delay the execution of a command.
+     *
+     * @param \App\Server\Contracts\Command $command to delay
+     * @param int                           $delay   in milliseconds
+     *
+     * @return self
+     */
+    public function delay(Command $command, $delay)
+    {
+        $command->delay($delay);
+
+        $this->run($command);
 
         return $this;
     }

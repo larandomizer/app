@@ -14,6 +14,6 @@ class AutoRestartServer extends Timer implements ShouldAutoStart
     public function __construct()
     {
         $this->command(StopServer::class)
-            ->interval(3600);
+            ->interval(60 * 60 * 1000);
     }
 }

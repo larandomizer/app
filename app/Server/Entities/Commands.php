@@ -30,7 +30,7 @@ class Commands extends Collection
      */
     public function remove(Command $command)
     {
-        $index = array_search($this->items, $command, $strict = true);
+        $index = array_search($command, $this->items, $strict = true);
         if ($index === false) {
             $this->offsetUnset($index);
         }
