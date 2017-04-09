@@ -214,6 +214,8 @@ abstract class Timer implements TimerInterface
      *
      * @param string|\App\Server\Contracts\Command $command
      *
+     * @throws \InvalidArgumentException if command argument is not a Command instance.
+     *
      * @return \App\Server\Contracts\Command|self
      */
     public function command($command = null)
