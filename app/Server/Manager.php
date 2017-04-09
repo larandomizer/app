@@ -10,6 +10,7 @@ use App\Server\Contracts\Listener;
 use App\Server\Contracts\Manager as ManagerInterface;
 use App\Server\Contracts\Message;
 use App\Server\Contracts\Process;
+use App\Server\Contracts\Promise;
 use App\Server\Contracts\SelfHandling;
 use App\Server\Contracts\Timer;
 use App\Server\Contracts\Topic;
@@ -736,6 +737,21 @@ class Manager implements ManagerInterface
         $input->output()->on('data', function ($chunk) use ($output) {
             $output->input()->write($chunk);
         });
+
+        return $this;
+    }
+
+    /**
+     * Run a deferred promise (for resolving asynchronous code).
+     *
+     * @param \App\Server\Contracts\Promise $promise to defer
+     * @param mixed                         $result  to resolve promise for
+     *
+     * @return self
+     */
+    public function promise(Promise $promise, $result = null)
+    {
+        $promise->dispatcher($this)->resolve($result);
 
         return $this;
     }

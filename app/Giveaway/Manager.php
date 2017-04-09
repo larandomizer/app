@@ -6,6 +6,7 @@ use App\Giveaway\Entities\Prizes;
 use App\Giveaway\Messages\UpdatePrizes;
 use App\Server\Contracts\Connection;
 use App\Server\Manager as BaseManager;
+use App\Server\Promises\AsyncExample;
 use App\Server\Timers\AutoRestartServer;
 use App\Server\Timers\CurrentUptime;
 use Carbon\Carbon;
@@ -32,6 +33,12 @@ class Manager extends BaseManager
 
         // Register all the listeners
         $this->listener(new Listener());
+
+        // Example Async Promise
+        // $promise = AsyncExample::make()
+        //     ->then(AsyncExample::class)
+        //     ->then(AsyncExample::class);
+        // $this->promise($promise, 'Example');
 
         return $this;
     }

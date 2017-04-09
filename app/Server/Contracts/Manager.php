@@ -392,4 +392,14 @@ interface Manager
      * @return self
      */
     public function pipe(Process $input, Process $output);
+
+    /**
+     * Run a deferred promise (for resolving asynchronous code).
+     *
+     * @param \App\Server\Contracts\Promise $promise to defer
+     * @param mixed                         $result  to resolve promise for
+     *
+     * @return self
+     */
+    public function promise(Promise $promise, $result = null);
 }
