@@ -63,8 +63,8 @@ return [
     */
 
     'namespaces' => [
-        'App\\Server\\Messages\\',
         'App\\Giveaway\\Messages\\',
+        'ArtisanSDK\\Server\\Messages\\',
     ],
 
 ];
