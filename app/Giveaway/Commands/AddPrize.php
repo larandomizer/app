@@ -4,7 +4,7 @@ namespace App\Giveaway\Commands;
 
 use App\Giveaway\Entities\Prize;
 use App\Giveaway\Messages\UpdatePrizes;
-use App\Server\Entities\Command;
+use ArtisanSDK\Server\Entities\Command;
 
 class AddPrize extends Command
 {
@@ -23,9 +23,11 @@ class AddPrize extends Command
      */
     public function run()
     {
+        // Add the prize to the prize pool
         $prizes = $this->dispatcher()->prizes();
         $prizes->push(new Prize(array_get($this->prize, 'name'), array_get($this->prize, 'sponsor')));
 
+        // Notify all the connections of the new prize
         return $this->dispatcher()
             ->broadcast(new UpdatePrizes($prizes));
     }

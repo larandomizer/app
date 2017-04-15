@@ -3,8 +3,8 @@
 namespace App\Giveaway\Messages;
 
 use App\Giveaway\Entities\Prizes;
-use App\Server\Contracts\ServerMessage;
-use App\Server\Entities\Message;
+use ArtisanSDK\Server\Contracts\ServerMessage;
+use ArtisanSDK\Server\Entities\Message;
 
 class UpdatePrizes extends Message implements ServerMessage
 {
