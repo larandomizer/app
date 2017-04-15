@@ -10,7 +10,7 @@
       </div>
       <div class="footer-links">
         <a href="http://laraveldfw.com" class="footer-link d-flex-inline align-top mdi mdi-slack" target="_blank">Laravel DFW</a>
-        <a href="http://github.com/artisanscollaborative/larandomizer" class="footer-link d-flex-inline align-top mdi mdi-github-circle" target="_blank">Source on GitHub</a>
+        <a href="http://github.com/larandomizer/app" class="footer-link d-flex-inline align-top mdi mdi-github-circle" target="_blank">Source on GitHub</a>
       </div>
     </div>
   </div>
