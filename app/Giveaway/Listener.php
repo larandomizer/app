@@ -2,7 +2,7 @@
 
 namespace App\Giveaway;
 
-use App\Server\Entities\Listener as BaseListener;
+use ArtisanSDK\Server\Entities\Listener as BaseListener;
 
 class Listener extends BaseListener
 {

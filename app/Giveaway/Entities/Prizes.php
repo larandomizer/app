@@ -2,7 +2,7 @@
 
 namespace App\Giveaway\Entities;
 
-use App\Server\Traits\UUIDFilter;
+use ArtisanSDK\Server\Traits\UUIDFilter;
 use Illuminate\Support\Collection;
 
 class Prizes extends Collection

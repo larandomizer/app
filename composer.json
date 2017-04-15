@@ -1,7 +1,7 @@
 {
     "name": "larandomizer/app",
     "description": "The Laravel application that you install and deploy that includes all necessary ReactPHP components as dependencies.",
-    "keywords": ["framework", "laravel", "randomizer", "reactphp", "async"],
+    "keywords": ["artisansdk", "laravel", "randomizer", "reactphp", "async", "realtime", "websocket", "prize", "meetup", "conference"],
     "license": "MIT",
     "type": "project",
     "require": {
@@ -12,7 +12,8 @@
         "pda/pheanstalk": "~3.0",
         "ramsey/uuid": "^3.5",
         "react/child-process": "^0.4.3",
-        "wyrihaximus/react-guzzle-psr7": "^2.0"
+        "wyrihaximus/react-guzzle-psr7": "^2.0",
+        "artisansdk/server": "1.x"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "2.0.0-alpha",

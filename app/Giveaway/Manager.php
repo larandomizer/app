@@ -4,15 +4,20 @@ namespace App\Giveaway;
 
 use App\Giveaway\Entities\Prizes;
 use App\Giveaway\Messages\UpdatePrizes;
-use App\Server\Contracts\Connection;
-use App\Server\Manager as BaseManager;
-use App\Server\Promises\AsyncExample;
-use App\Server\Timers\AutoRestartServer;
-use App\Server\Timers\CurrentUptime;
+use ArtisanSDK\Server\Contracts\Connection;
+use ArtisanSDK\Server\Manager as BaseManager;
+use ArtisanSDK\Server\Promises\AsyncExample;
+use ArtisanSDK\Server\Timers\AutoRestartServer;
+use ArtisanSDK\Server\Timers\CurrentUptime;
 use Carbon\Carbon;
 
 class Manager extends BaseManager
 {
+    /**
+     * Collection of prizes.
+     *
+     * @var \App\Giveaway\Entities\Prizes
+     */
     protected $prizes;
 
     /**
@@ -22,6 +27,7 @@ class Manager extends BaseManager
      */
     public function boot()
     {
+        // Make sure default bootloader runs
         parent::boot();
 
         // Initialize collections
@@ -46,26 +52,30 @@ class Manager extends BaseManager
     /**
      * Called when a new connection is opened.
      *
-     * @param \App\Server\Contracts\Connection $connection being opened
+     * @param \ArtisanSDK\Server\Contracts\Connection $connection being opened
      *
      * @return self
      */
     public function open(Connection $connection)
     {
+        // Setup the connection using the default methods
         parent::open($connection);
 
-        return $this->send(new UpdatePrizes($this->prizes()), $connection);
+        // Send a list of prizes to new connection
+        $this->send(new UpdatePrizes($this->prizes()), $connection);
+
+        return $this;
     }
 
     /**
      * Get or set the prizes available on the server.
      *
-     * @example prizes() ==> \App\Server\Entities\Prizes
+     * @example prizes() ==> \App\Giveaway\Entities\Prizes
      *          prizes($prizes) ==> self
      *
-     * @param \App\Server\Entities\Prizes $prizes
+     * @param \App\Giveaway\Entities\Prizes $prizes
      *
-     * @return \App\Server\Entities\Prizes|self
+     * @return \App\Giveaway\Entities\Prizes|self
      */
     public function prizes(Prizes $prizes = null)
     {

@@ -3,8 +3,8 @@
 namespace App\Giveaway\Entities;
 
 use App\Giveaway\Contracts\Prize as PrizeInterface;
-use App\Server\Traits\FluentProperties;
-use App\Server\Traits\JsonHelpers;
+use ArtisanSDK\Server\Traits\FluentProperties;
+use ArtisanSDK\Server\Traits\JsonHelpers;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
 use JsonSerializable;

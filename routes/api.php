@@ -14,11 +14,11 @@ use Illuminate\Http\Request;
 */
 
 $router->group(['prefix' => 'connection'], function($router) {
-    $router->get('{uuid}', 'Connection@notify');
-    $router->get('{uuid}', 'Connection@dismissNotifications');
-    $router->get('{uuid}', 'Connection@disconnect');
-    $router->get('{type}', 'Connection@disconnectType');
-    $router->get('/', 'Connection@disconnectAll');
+    $router->post('{uuid}/notification', 'Connection@notify');
+    $router->delete('{uuid}/notification', 'Connection@dismissNotifications');
+    $router->delete('{uuid}', 'Connection@disconnect');
+    $router->delete('{type}', 'Connection@disconnectType');
+    $router->delete('/', 'Connection@disconnectAll');
 });
 
 $router->post('notification', 'Notification@send');
@@ -34,4 +34,4 @@ $router->group(['prefix' => 'topic'], function($router) {
     $router->post('/', 'Topic@store');
 });
 
-$router->post('server', 'Server@restart');
+$router->delete('server', 'Server@restart');
