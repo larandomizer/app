@@ -22,6 +22,16 @@ cp .env.example .env
 php artisan key:generate
 ```
 
+### Extra Dependencies
+
+If you plan to use any AWS resources or async S3 filesystem interactions then you
+will want to install the `league/flysystem-aws-s3-v3` dependency. If you plan to
+use the APIs to interact with the Beanstalkd realtime queue bridge then you'll
+also need to install the `pda/pheanstalk` dependency:
+
+- `composer require league/flysystem-aws-s3-v3 ~1.0`
+- `composer require pda/pheanstalk ~3.0`
+
 ## Usage Guide
 
 This application depends on [`artisansdk/server`](http://github.com/artisansdk/server)
