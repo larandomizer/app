@@ -11,7 +11,7 @@
         "ramsey/uuid": "~3.5"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "2.0.0-alpha",
+        "friendsofphp/php-cs-fixer": "~2.2",
         "fzaninotto/faker": "~1.4",
         "laravel/homestead": "~4.0",
         "laravel/tinker": "~1.0",
